@@ -84,8 +84,8 @@ pipeline {
         // ============================================================
         // MONITORING
         //
-        // Reserved for future Prometheus/Grafana implementation.
-        // No monitoring stage currently executes.
+        // Reserved for the independent Prometheus/Grafana
+        // implementation.
         // ============================================================
 
         PROMETHEUS_URL =
@@ -103,25 +103,47 @@ pipeline {
         // ============================================================
 
         stage('Checkout Repositories') {
+
             steps {
+
                 script {
-                    load('stages/checkout.groovy').run()
+
+                    /*
+                     * checkout.groovy contains executable top-level
+                     * Jenkins Pipeline code and does NOT define
+                     * def run().
+                     *
+                     * Therefore it must be loaded directly.
+                     */
+                    load('stages/checkout.groovy')
                 }
             }
         }
+
 
         stage('Verify Docker') {
+
             steps {
+
                 script {
-                    load('stages/docker-verification.groovy').run()
+
+                    load(
+                        'stages/docker-verification.groovy'
+                    ).run()
                 }
             }
         }
 
+
         stage('Prepare Reports') {
+
             steps {
+
                 script {
-                    load('stages/report-preparation.groovy').run()
+
+                    load(
+                        'stages/report-preparation.groovy'
+                    ).run()
                 }
             }
         }
@@ -132,17 +154,28 @@ pipeline {
         // ============================================================
 
         stage('Semgrep SAST') {
+
             steps {
+
                 script {
-                    load('stages/semgrep-sast.groovy').run()
+
+                    load(
+                        'stages/semgrep-sast.groovy'
+                    ).run()
                 }
             }
         }
 
+
         stage('Analyze Semgrep') {
+
             steps {
+
                 script {
-                    load('stages/semgrep-analysis.groovy').run()
+
+                    load(
+                        'stages/semgrep-analysis.groovy'
+                    ).run()
                 }
             }
         }
@@ -157,35 +190,58 @@ pipeline {
             parallel {
 
                 stage('Gitleaks Secret Scan') {
+
                     steps {
+
                         script {
-                            load('stages/gitleaks-scan.groovy').run()
+
+                            load(
+                                'stages/gitleaks-scan.groovy'
+                            ).run()
                         }
                     }
                 }
+
 
                 stage('Snyk Dependency Scan') {
+
                     steps {
+
                         script {
-                            load('stages/snyk-scan.groovy').run()
+
+                            load(
+                                'stages/snyk-scan.groovy'
+                            ).run()
                         }
                     }
                 }
 
+
                 stage('Trivy Container Scan') {
+
                     steps {
+
                         script {
-                            load('stages/trivy-scan.groovy').run()
+
+                            load(
+                                'stages/trivy-scan.groovy'
+                            ).run()
                         }
                     }
                 }
             }
         }
 
+
         stage('Analyze Static Scans') {
+
             steps {
+
                 script {
-                    load('stages/static-analysis.groovy').run()
+
+                    load(
+                        'stages/static-analysis.groovy'
+                    ).run()
                 }
             }
         }
@@ -196,49 +252,84 @@ pipeline {
         // ============================================================
 
         stage('Cleanup Old DAST') {
+
             steps {
+
                 script {
-                    load('stages/dast-cleanup.groovy').run()
+
+                    load(
+                        'stages/dast-cleanup.groovy'
+                    ).run()
                 }
             }
         }
+
 
         stage('Start DAST Environment') {
+
             steps {
+
                 script {
-                    load('stages/dast-start.groovy').run()
+
+                    load(
+                        'stages/dast-start.groovy'
+                    ).run()
                 }
             }
         }
+
 
         stage('Wait For DAST Scan') {
+
             steps {
+
                 script {
-                    load('stages/dast-wait.groovy').run()
+
+                    load(
+                        'stages/dast-wait.groovy'
+                    ).run()
                 }
             }
         }
+
 
         stage('Collect DAST Reports') {
+
             steps {
+
                 script {
-                    load('stages/dast-reports.groovy').run()
+
+                    load(
+                        'stages/dast-reports.groovy'
+                    ).run()
                 }
             }
         }
+
 
         stage('Stop DAST Environment') {
+
             steps {
+
                 script {
-                    load('stages/dast-stop.groovy').run()
+
+                    load(
+                        'stages/dast-stop.groovy'
+                    ).run()
                 }
             }
         }
 
+
         stage('Analyze DAST Results') {
+
             steps {
+
                 script {
-                    load('stages/dast-analysis.groovy').run()
+
+                    load(
+                        'stages/dast-analysis.groovy'
+                    ).run()
                 }
             }
         }
@@ -249,9 +340,14 @@ pipeline {
         // ============================================================
 
         stage('Generate Summary Report') {
+
             steps {
+
                 script {
-                    load('stages/summary-report.groovy').run()
+
+                    load(
+                        'stages/summary-report.groovy'
+                    ).run()
                 }
             }
         }
@@ -262,25 +358,42 @@ pipeline {
         // ============================================================
 
         stage('Start DefectDojo') {
+
             steps {
+
                 script {
-                    load('stages/defectdojo-start.groovy').run()
+
+                    load(
+                        'stages/defectdojo-start.groovy'
+                    ).run()
                 }
             }
         }
+
 
         stage('Upload Reports to DefectDojo') {
+
             steps {
+
                 script {
-                    load('stages/defectdojo-upload.groovy').run()
+
+                    load(
+                        'stages/defectdojo-upload.groovy'
+                    ).run()
                 }
             }
         }
 
+
         stage('Collect Unified Findings') {
+
             steps {
+
                 script {
-                    load('stages/defectdojo-findings.groovy').run()
+
+                    load(
+                        'stages/defectdojo-findings.groovy'
+                    ).run()
                 }
             }
         }
@@ -293,13 +406,19 @@ pipeline {
         stage('OPA Policy Evaluation') {
 
             steps {
+
                 script {
-                    load('stages/opa-evaluation.groovy').run()
+
+                    load(
+                        'stages/opa-evaluation.groovy'
+                    ).run()
                 }
             }
 
             post {
+
                 always {
+
                     archiveArtifacts(
                         artifacts:
                             'opa-result.json,opa-evaluation.json',
@@ -316,9 +435,14 @@ pipeline {
         // ============================================================
 
         stage('Dynamic WAF Protection') {
+
             steps {
+
                 script {
-                    load('stages/waf-protection.groovy').run()
+
+                    load(
+                        'stages/waf-protection.groovy'
+                    ).run()
                 }
             }
         }
@@ -327,9 +451,10 @@ pipeline {
         // ============================================================
         // PROMETHEUS + GRAFANA
         //
-        // INTENTIONALLY NOT EXECUTED YET.
+        // NOT ACTIVE YET.
         //
-        // monitoring/ remains reserved for the future implementation.
+        // monitoring/ remains reserved for the independent
+        // monitoring implementation.
         // ============================================================
 
 
@@ -338,18 +463,23 @@ pipeline {
         // ============================================================
 
         stage('Archive Reports') {
+
             steps {
+
                 script {
-                    load('stages/archive-reports.groovy').run()
+
+                    load(
+                        'stages/archive-reports.groovy'
+                    ).run()
                 }
             }
         }
     }
 
 
-    // ================================================================
+    // =================================================================
     // POST ACTIONS
-    // ================================================================
+    // =================================================================
 
     post {
 
@@ -357,9 +487,9 @@ pipeline {
 
             script {
 
-                // ----------------------------------------------------
-                // VERIFY INTERNAL NOTIFICATION COMPONENTS
-                // ----------------------------------------------------
+                // -----------------------------------------------------
+                // VERIFY NOTIFICATION COMPONENTS
+                // -----------------------------------------------------
 
                 try {
 
@@ -367,6 +497,7 @@ pipeline {
                     echo 'Preparing notification components...'
 
                     bat '''
+
                     if not exist notification mkdir notification
 
                     if not exist "notification\\security-email.groovy" (
@@ -383,6 +514,7 @@ pipeline {
                         echo ERROR: slack-notification.groovy not found.
                         exit /b 1
                     )
+
                     '''
 
                     echo 'Notification components verified.'
@@ -394,9 +526,9 @@ pipeline {
                 }
 
 
-                // ----------------------------------------------------
+                // -----------------------------------------------------
                 // SAFETY ARCHIVE
-                // ----------------------------------------------------
+                // -----------------------------------------------------
 
                 try {
 
@@ -405,7 +537,7 @@ pipeline {
 
                     def remainingReports =
                         findFiles(
-                            glob: 'reports/**/*'
+                            glob: 'reports/**/*
                         ).findAll { file ->
                             !file.directory
                         }
@@ -432,9 +564,9 @@ pipeline {
                 }
 
 
-                // ----------------------------------------------------
+                // -----------------------------------------------------
                 // EMAIL
-                // ----------------------------------------------------
+                // -----------------------------------------------------
 
                 try {
 
@@ -456,9 +588,9 @@ pipeline {
                 }
 
 
-                // ----------------------------------------------------
+                // -----------------------------------------------------
                 // SLACK
-                // ----------------------------------------------------
+                // -----------------------------------------------------
 
                 try {
 
@@ -480,9 +612,9 @@ pipeline {
                 }
 
 
-                // ----------------------------------------------------
+                // -----------------------------------------------------
                 // CLEANUP
-                // ----------------------------------------------------
+                // -----------------------------------------------------
 
                 echo ''
                 echo 'Cleaning Docker environment...'
@@ -492,13 +624,14 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =============================================================
         // SUCCESS
-        // ============================================================
+        // =============================================================
 
         success {
 
             echo '''
+
 =========================================
  SECURITY AUTOMATION PIPELINE COMPLETED
 =========================================
@@ -517,21 +650,23 @@ pipeline {
 ✓ Security Email Notification Sent
 ✓ Slack Notification Sent
 
-Prometheus/Grafana monitoring is reserved
-for a future implementation.
+Prometheus/Grafana monitoring remains
+reserved for the independent implementation.
 
 =========================================
+
 '''
         }
 
 
-        // ============================================================
+        // =============================================================
         // UNSTABLE
-        // ============================================================
+        // =============================================================
 
         unstable {
 
             echo '''
+
 =========================================
  PIPELINE UNSTABLE
 =========================================
@@ -554,17 +689,19 @@ The pipeline completed, but remediation
 may be required before release.
 
 =========================================
+
 '''
         }
 
 
-        // ============================================================
+        // =============================================================
         // FAILURE
-        // ============================================================
+        // =============================================================
 
         failure {
 
             echo '''
+
 =========================================
  PIPELINE FAILED
 =========================================
@@ -582,6 +719,7 @@ Review the Jenkins build and security
 evidence before rerunning.
 
 =========================================
+
 '''
         }
     }
