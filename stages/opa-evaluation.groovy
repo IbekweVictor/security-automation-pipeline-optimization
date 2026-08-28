@@ -1,329 +1,299 @@
-def run() {
+echo '======================================'
+echo 'OPA POLICY EVALUATION'
+echo '======================================'
 
-    echo '======================================'
-    echo 'OPA POLICY EVALUATION'
-    echo '======================================'
+/*
+ * ------------------------------------------------------------
+ * VERIFY REQUIRED INPUTS
+ * ------------------------------------------------------------
+ */
 
-    /*
-     * ------------------------------------------------------------
-     * VERIFY REQUIRED INPUTS
-     * ------------------------------------------------------------
-     */
-
-    if (!fileExists('unified-findings.json')) {
-
-        error(
-            'OPA ERROR: unified-findings.json was not found.'
-        )
-    }
-
-    echo 'Unified findings found.'
-
-    if (!fileExists('opa/policy.rego')) {
-
-        error(
-            'OPA ERROR: opa/policy.rego was not found.'
-        )
-    }
-
-    echo 'Local project OPA policy found.'
-
-
-    /*
-     * ------------------------------------------------------------
-     * VERIFY OPA
-     * ------------------------------------------------------------
-     */
-
-    def versionStatus = bat(
-        script: 'opa version',
-        returnStatus: true
+if (!fileExists('unified-findings.json')) {
+    error(
+        'OPA ERROR: unified-findings.json was not found.'
     )
+}
 
-    if (versionStatus != 0) {
+echo 'Unified findings found.'
 
-        error(
-            'OPA ERROR: Open Policy Agent is not installed or not available in PATH.'
-        )
-    }
-
-
-    /*
-     * ------------------------------------------------------------
-     * VALIDATE POLICY
-     * ------------------------------------------------------------
-     */
-
-    echo 'Validating opa/policy.rego...'
-
-    def checkStatus = bat(
-        script:
-            'opa check opa/policy.rego',
-        returnStatus: true
+if (!fileExists('opa/policy.rego')) {
+    error(
+        'OPA ERROR: opa/policy.rego was not found.'
     )
+}
 
-    if (checkStatus != 0) {
+echo 'Local project OPA policy found.'
 
-        error(
-            'OPA ERROR: opa/policy.rego failed validation.'
-        )
-    }
+/*
+ * ------------------------------------------------------------
+ * VERIFY OPA
+ * ------------------------------------------------------------
+ */
 
-    echo 'OPA policy validation: PASSED'
+def versionStatus = bat(
+    script: 'opa version',
+    returnStatus: true
+)
 
-
-    /*
-     * ------------------------------------------------------------
-     * DISPLAY UNIFIED FINDINGS
-     * ------------------------------------------------------------
-     */
-
-    echo 'Checking unified findings input...'
-
-    bat '''
-    echo.
-    echo ===== UNIFIED FINDINGS =====
-    type unified-findings.json
-    echo.
-    '''
-
-
-    /*
-     * ------------------------------------------------------------
-     * EXECUTE OPA POLICY
-     * ------------------------------------------------------------
-     */
-
-    echo 'Running OPA policy evaluation...'
-
-    def evalStatus = bat(
-        script: '''
-        if exist "opa-evaluation.json" del /Q "opa-evaluation.json"
-
-        opa eval ^
-          --format=json ^
-          --input "unified-findings.json" ^
-          --data "opa/policy.rego" ^
-          "data.cicd.security.result" ^
-          > "opa-evaluation.json"
-        ''',
-        returnStatus: true
+if (versionStatus != 0) {
+    error(
+        'OPA ERROR: Open Policy Agent is not installed or not available in PATH.'
     )
+}
 
-    if (evalStatus != 0) {
+/*
+ * ------------------------------------------------------------
+ * VALIDATE POLICY
+ * ------------------------------------------------------------
+ */
 
-        error(
-            'OPA ERROR: Policy evaluation failed.'
-        )
-    }
+echo 'Validating opa/policy.rego...'
 
-    if (!fileExists('opa-evaluation.json')) {
+def checkStatus = bat(
+    script:
+        'opa check opa/policy.rego',
+    returnStatus: true
+)
 
-        error(
-            'OPA ERROR: opa-evaluation.json was not generated.'
-        )
-    }
-
-    echo 'OPA evaluation completed successfully.'
-
-
-    /*
-     * ------------------------------------------------------------
-     * EXTRACT DECISION
-     * ------------------------------------------------------------
-     */
-
-    def decisionStatus = bat(
-        script: '''
-        if exist "opa-decision.txt" del /Q "opa-decision.txt"
-
-        opa eval ^
-          --format=raw ^
-          --input "unified-findings.json" ^
-          --data "opa/policy.rego" ^
-          "data.cicd.security.result.decision" ^
-          > "opa-decision.txt"
-        ''',
-        returnStatus: true
+if (checkStatus != 0) {
+    error(
+        'OPA ERROR: opa/policy.rego failed validation.'
     )
+}
 
-    if (decisionStatus != 0) {
+echo 'OPA policy validation: PASSED'
 
-        error(
-            'OPA ERROR: Unable to extract policy decision.'
-        )
-    }
+/*
+ * ------------------------------------------------------------
+ * DISPLAY UNIFIED FINDINGS
+ * ------------------------------------------------------------
+ */
 
+echo 'Checking unified findings input...'
 
-    /*
-     * ------------------------------------------------------------
-     * EXTRACT MESSAGE
-     * ------------------------------------------------------------
-     */
+bat '''
+echo.
+echo ===== UNIFIED FINDINGS =====
+type unified-findings.json
+echo.
+'''
 
-    def messageStatus = bat(
-        script: '''
-        if exist "opa-message.txt" del /Q "opa-message.txt"
+/*
+ * ------------------------------------------------------------
+ * EXECUTE OPA POLICY
+ * ------------------------------------------------------------
+ */
 
-        opa eval ^
-          --format=raw ^
-          --input "unified-findings.json" ^
-          --data "opa/policy.rego" ^
-          "data.cicd.security.result.message" ^
-          > "opa-message.txt"
-        ''',
-        returnStatus: true
+echo 'Running OPA policy evaluation...'
+
+def evalStatus = bat(
+    script: '''
+    if exist "opa-evaluation.json" del /Q "opa-evaluation.json"
+
+    opa eval ^
+      --format=json ^
+      --input "unified-findings.json" ^
+      --data "opa/policy.rego" ^
+      "data.cicd.security.result" ^
+      > "opa-evaluation.json"
+    ''',
+    returnStatus: true
+)
+
+if (evalStatus != 0) {
+    error(
+        'OPA ERROR: Policy evaluation failed.'
     )
+}
 
-    if (messageStatus != 0) {
+if (!fileExists('opa-evaluation.json')) {
+    error(
+        'OPA ERROR: opa-evaluation.json was not generated.'
+    )
+}
 
-        error(
-            'OPA ERROR: Unable to extract policy message.'
-        )
-    }
+echo 'OPA evaluation completed successfully.'
 
+/*
+ * ------------------------------------------------------------
+ * EXTRACT DECISION
+ * ------------------------------------------------------------
+ */
 
-    /*
-     * ------------------------------------------------------------
-     * READ OPA RESULT
-     * ------------------------------------------------------------
-     */
+def decisionStatus = bat(
+    script: '''
+    if exist "opa-decision.txt" del /Q "opa-decision.txt"
 
-    def opaDecision =
-        readFile(
-            'opa-decision.txt'
-        )
-        .trim()
-        .toUpperCase()
+    opa eval ^
+      --format=raw ^
+      --input "unified-findings.json" ^
+      --data "opa/policy.rego" ^
+      "data.cicd.security.result.decision" ^
+      > "opa-decision.txt"
+    ''',
+    returnStatus: true
+)
 
-    def opaMessage =
-        readFile(
-            'opa-message.txt'
-        )
-        .trim()
+if (decisionStatus != 0) {
+    error(
+        'OPA ERROR: Unable to extract policy decision.'
+    )
+}
 
+/*
+ * ------------------------------------------------------------
+ * EXTRACT MESSAGE
+ * ------------------------------------------------------------
+ */
 
-    /*
-     * ------------------------------------------------------------
-     * VALIDATE OPA OUTPUT
-     * ------------------------------------------------------------
-     */
+def messageStatus = bat(
+    script: '''
+    if exist "opa-message.txt" del /Q "opa-message.txt"
 
-    if (!opaDecision) {
+    opa eval ^
+      --format=raw ^
+      --input "unified-findings.json" ^
+      --data "opa/policy.rego" ^
+      "data.cicd.security.result.message" ^
+      > "opa-message.txt"
+    ''',
+    returnStatus: true
+)
 
-        error(
-            'OPA ERROR: OPA returned an empty decision.'
-        )
-    }
+if (messageStatus != 0) {
+    error(
+        'OPA ERROR: Unable to extract policy message.'
+    )
+}
 
-    if (!opaMessage) {
+/*
+ * ------------------------------------------------------------
+ * READ OPA RESULT
+ * ------------------------------------------------------------
+ */
 
-        error(
-            'OPA ERROR: OPA returned an empty message.'
-        )
-    }
+def opaDecision =
+    readFile(
+        'opa-decision.txt'
+    )
+    .trim()
+    .toUpperCase()
 
+def opaMessage =
+    readFile(
+        'opa-message.txt'
+    )
+    .trim()
 
-    def validDecisions = [
-        'ALLOW',
-        'WARNING',
-        'BLOCK'
-    ]
+/*
+ * ------------------------------------------------------------
+ * VALIDATE OPA OUTPUT
+ * ------------------------------------------------------------
+ */
 
-    if (!validDecisions.contains(opaDecision)) {
+if (!opaDecision) {
+    error(
+        'OPA ERROR: OPA returned an empty decision.'
+    )
+}
 
-        error(
-            "OPA ERROR: Invalid decision returned: ${opaDecision}"
-        )
-    }
+if (!opaMessage) {
+    error(
+        'OPA ERROR: OPA returned an empty message.'
+    )
+}
 
+def validDecisions = [
+    'ALLOW',
+    'WARNING',
+    'BLOCK'
+]
 
-    /*
-     * ------------------------------------------------------------
-     * CREATE PIPELINE-FRIENDLY RESULT
-     * ------------------------------------------------------------
-     */
+if (!validDecisions.contains(opaDecision)) {
+    error(
+        "OPA ERROR: Invalid decision returned: ${opaDecision}"
+    )
+}
 
-    def escapedMessage =
-        opaMessage
-            .replace('\\', '\\\\')
-            .replace('"', '\\"')
-            .replace('\r', '')
-            .replace('\n', '\\n')
+/*
+ * ------------------------------------------------------------
+ * CREATE PIPELINE-FRIENDLY RESULT
+ * ------------------------------------------------------------
+ */
 
-    def cleanOpaResult = """{
+def escapedMessage =
+    opaMessage
+        .replace('\\', '\\\\')
+        .replace('"', '\\"')
+        .replace('\r', '')
+        .replace('\n', '\\n')
+
+def cleanOpaResult = """{
     "decision": "${opaDecision}",
     "message": "${escapedMessage}"
 }"""
 
-    writeFile(
-        file: 'opa-result.json',
-        text: cleanOpaResult
-    )
+writeFile(
+    file: 'opa-result.json',
+    text: cleanOpaResult
+)
 
-
-    /*
-     * ------------------------------------------------------------
-     * EXPORT PIPELINE ENVIRONMENT VARIABLES
-     * ------------------------------------------------------------
-     */
-
-    env.OPA_DECISION =
-        opaDecision
-
-    env.OPA_MESSAGE =
-        opaMessage
-
-
-    /*
-     * ------------------------------------------------------------
-     * DISPLAY RESULT
-     * ------------------------------------------------------------
+/*
+ * ------------------------------------------------------------
+ * EXPORT PIPELINE ENVIRONMENT VARIABLES
+ * ------------------------------------------------------------
  */
 
-    echo ''
-    echo '======================================'
-    echo 'OPA POLICY RESULT'
-    echo '======================================'
+env.OPA_DECISION = opaDecision
+env.OPA_MESSAGE  = opaMessage
 
-    echo "Decision : ${opaDecision}"
-    echo "Message  : ${opaMessage}"
+/*
+ * ------------------------------------------------------------
+ * DISPLAY RESULT
+ * ------------------------------------------------------------
+ */
 
-    echo '======================================'
+echo ''
 
+echo '======================================'
+echo 'OPA POLICY RESULT'
+echo '======================================'
 
-    /*
-     * ------------------------------------------------------------
-     * PIPELINE STATUS
-     *
-     * BLOCK and WARNING are deliberately marked UNSTABLE
-     * rather than FAILED so that the pipeline can continue to
-     * archive evidence and execute notification stages.
-     * ------------------------------------------------------------
-     */
+echo "Decision : ${opaDecision}"
+echo "Message  : ${opaMessage}"
 
-    if (opaDecision == 'BLOCK') {
+echo '======================================'
 
-        unstable(
-            "Security policy BLOCK: ${opaMessage}"
-        )
+/*
+ * ------------------------------------------------------------
+ * PIPELINE STATUS
+ *
+ * BLOCK and WARNING are deliberately marked UNSTABLE
+ * rather than FAILED so that the pipeline can continue to
+ * archive evidence and execute notification stages.
+ * ------------------------------------------------------------
+ */
 
-    } else if (opaDecision == 'WARNING') {
+if (opaDecision == 'BLOCK') {
 
-        unstable(
-            "Security policy WARNING: ${opaMessage}"
-        )
+    unstable(
+        "Security policy BLOCK: ${opaMessage}"
+    )
 
-    } else {
+} else if (opaDecision == 'WARNING') {
 
-        echo 'OPA DECISION: ALLOW'
-        echo 'Policy requirements satisfied.'
-    }
+    unstable(
+        "Security policy WARNING: ${opaMessage}"
+    )
 
-    echo ''
-    echo 'OPA POLICY EVALUATION COMPLETED.'
-    echo ''
+} else {
+
+    echo 'OPA DECISION: ALLOW'
+    echo 'Policy requirements satisfied.'
 }
 
+echo ''
 
-return this
+echo 'OPA POLICY EVALUATION COMPLETED.'
+
+echo ''

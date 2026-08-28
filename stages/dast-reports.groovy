@@ -1,38 +1,18 @@
-def run() {
+/************************************************
+ * Collect DAST Reports
+ ************************************************/
 
-    timeout(time: 30, unit: 'MINUTES') {
-
-        boolean finished = false
-
-
-        while (!finished) {
-
-            def logs = bat(
-                script:
-                    'docker logs scanner 2>&1',
-                returnStdout: true
-            ).trim()
-
-
-            echo logs
-
-
-            if (logs.contains('[+] Finished')) {
-
-                finished = true
-
-                echo 'Authenticated DAST Completed.'
-
-            } else {
-
-                sleep(
-                    time: 30,
-                    unit: 'SECONDS'
-                )
-            }
-        }
-    }
+if (!fileExists(env.REPORT_DIR)) {
+    bat """
+    if not exist "%REPORT_DIR%" mkdir "%REPORT_DIR%"
+    """
 }
 
+bat """
+docker cp scanner:/app/reports/zap-report.json "%REPORT_DIR%\\zap-report.json"
+docker cp scanner:/app/reports/zap-report.html "%REPORT_DIR%\\zap-report.html"
+docker cp scanner:/app/reports/zap-report.xml "%REPORT_DIR%\\zap-report.xml"
+docker logs scanner > "%REPORT_DIR%\\scanner.log" 2>&1
+"""
 
-return this
+echo '✓ DAST reports collected.'

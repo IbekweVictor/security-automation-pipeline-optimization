@@ -1,10 +1,14 @@
-def run() {
+echo '======================================'
+echo 'STARTING AUTHENTICATED DAST ENVIRONMENT'
+echo '======================================'
 
-    dir('authenticated-dast') {
+dir('authenticated-dast') {
 
-        bat 'docker compose up -d'
-    }
+    bat 'docker compose up -d'
 }
 
+echo '✓ Authenticated DAST environment started.'
 
-return this
+echo '======================================'
+echo 'DAST ENVIRONMENT READY'
+echo '======================================'

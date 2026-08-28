@@ -1,38 +1,29 @@
-def run() {
+timeout(time: 30, unit: 'MINUTES') {
 
-    timeout(time: 30, unit: 'MINUTES') {
+    boolean finished = false
 
-        boolean finished = false
+    while (!finished) {
 
+        def logs = bat(
+            script:
+                'docker logs scanner 2>&1',
+            returnStdout: true
+        ).trim()
 
-        while (!finished) {
+        echo logs
 
-            def logs = bat(
-                script:
-                    'docker logs scanner 2>&1',
-                returnStdout: true
-            ).trim()
+        if (logs.contains('[+] Finished')) {
 
+            finished = true
 
-            echo logs
+            echo 'Authenticated DAST Completed.'
 
+        } else {
 
-            if (logs.contains('[+] Finished')) {
-
-                finished = true
-
-                echo 'Authenticated DAST Completed.'
-
-            } else {
-
-                sleep(
-                    time: 30,
-                    unit: 'SECONDS'
-                )
-            }
+            sleep(
+                time: 30,
+                unit: 'SECONDS'
+            )
         }
     }
 }
-
-
-return this
