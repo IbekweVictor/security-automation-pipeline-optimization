@@ -1,73 +1,49 @@
-def run() {
+int semgrepCritical = 0
+int semgrepWarning  = 0
+int semgrepInfo     = 0
 
-    int semgrepCritical = 0
-    int semgrepWarning  = 0
-    int semgrepInfo     = 0
+if (fileExists('reports/semgrep-report.json')) {
 
+    def r = readJSON(
+        file: 'reports/semgrep-report.json'
+    )
 
-    if (fileExists('reports/semgrep-report.json')) {
+    def results = r.results ?: []
 
-        def r =
-            readJSON(
-                file: 'reports/semgrep-report.json'
-            )
-
-        def results =
-            r.results ?: []
-
-
-        semgrepCritical =
-            results.count {
-                it.extra?.severity == 'ERROR'
-            }
-
-
-        semgrepWarning =
-            results.count {
-                it.extra?.severity == 'WARNING'
-            }
-
-
-        semgrepInfo =
-            results.count {
-                it.extra?.severity == 'INFO'
-            }
-
-
-        if (results.size() > 0) {
-
-            echo 'Top Semgrep Findings:'
-
-            results.take(5).each {
-
-                echo "  [${it.extra?.severity}] ${it.check_id}"
-            }
-        }
+    semgrepCritical = results.count {
+        it.extra?.severity == 'ERROR'
     }
 
+    semgrepWarning = results.count {
+        it.extra?.severity == 'WARNING'
+    }
 
-    env.SEMGREP_CRITICAL =
-        "${semgrepCritical}"
+    semgrepInfo = results.count {
+        it.extra?.severity == 'INFO'
+    }
 
-    env.SEMGREP_WARNING =
-        "${semgrepWarning}"
+    if (results.size() > 0) {
 
-    env.SEMGREP_INFO =
-        "${semgrepInfo}"
+        echo 'Top Semgrep Findings:'
 
+        results.take(5).each {
+            echo "  [${it.extra?.severity}] ${it.check_id}"
+        }
+    }
+}
 
-    echo '''
+env.SEMGREP_CRITICAL = "${semgrepCritical}"
+env.SEMGREP_WARNING  = "${semgrepWarning}"
+env.SEMGREP_INFO     = "${semgrepInfo}"
+
+echo '''
 ======================================
 SEMGREP RESULTS
 ======================================
 '''
 
-    echo "Critical : ${semgrepCritical}"
-    echo "Warning  : ${semgrepWarning}"
-    echo "Info     : ${semgrepInfo}"
+echo "Critical : ${semgrepCritical}"
+echo "Warning  : ${semgrepWarning}"
+echo "Info     : ${semgrepInfo}"
 
-    echo '======================================'
-}
-
-
-return this
+echo '======================================'

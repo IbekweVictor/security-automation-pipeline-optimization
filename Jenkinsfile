@@ -63,6 +63,74 @@ pipeline {
         }
     }
 
+    stage('Prepare Reports') {
+    steps {
+        script {
+            load('stages/report-preparation.groovy')
+        }
+    }
+}
+
+stage('Semgrep SAST') {
+    steps {
+        script {
+            load('stages/semgrep-sast.groovy')
+        }
+    }
+}
+
+stage('Analyze Semgrep') {
+    steps {
+        script {
+            load('stages/semgrep-analysis.groovy')
+        }
+    }
+}
+
+stage('Security Scans') {
+    parallel {
+
+        stage('Gitleaks Secret Scan') {
+            steps {
+                script {
+                    load('stages/gitleaks-scan.groovy')
+                }
+            }
+        }
+
+        stage('Snyk Dependency Scan') {
+            steps {
+                script {
+                    load('stages/snyk-scan.groovy')
+                }
+            }
+        }
+
+        stage('Trivy Container Scan') {
+            steps {
+                script {
+                    load('stages/trivy-scan.groovy')
+                }
+            }
+        }
+    }
+}
+
+stage('Analyze Static Scans') {
+    steps {
+        script {
+            load('stages/static-analysis.groovy')
+        }
+    }
+}
+
+stage('Cleanup Old DAST') {
+    steps {
+        script {
+            load('stages/dast-cleanup.groovy')
+        }
+    }
+}
 
     // ================================================================
     // POST ACTIONS
