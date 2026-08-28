@@ -10,6 +10,10 @@ pipeline {
 
     environment {
 
+        // ============================================================
+        // REPOSITORIES
+        // ============================================================
+
         DVWA_REPO =
             'https://github.com/IbekweVictor/DVWA.git'
 
@@ -18,6 +22,10 @@ pipeline {
     }
 
     stages {
+
+        // ============================================================
+        // CHECKOUT
+        // ============================================================
 
         stage('Checkout Repositories') {
 
@@ -33,38 +41,63 @@ pipeline {
                 }
             }
         }
-    }
-    stage('Verify Docker') {
-    steps {
-        script {
-            load('stages/docker-verification.groovy')
+
+
+        // ============================================================
+        // DOCKER VERIFICATION
+        // ============================================================
+
+        stage('Verify Docker') {
+
+            steps {
+
+                script {
+
+                    echo 'Loading Docker verification stage...'
+
+                    load('stages/docker-verification.groovy')
+
+                    echo 'Docker verification stage completed.'
+                }
+            }
         }
     }
-}
+
+
+    // ================================================================
+    // POST ACTIONS
+    // ================================================================
+
     post {
 
         success {
 
             echo '''
 =========================================
- CHECKOUT TEST PASSED
+ CHECKOUT + DOCKER TEST PASSED
 =========================================
 
 ✓ DVWA repository checked out
 ✓ Authenticated DAST repository checked out
+✓ Docker verified
+✓ Docker Compose verified
+
+The pipeline is ready for the next stage.
 
 =========================================
 '''
         }
 
+
         failure {
 
             echo '''
 =========================================
- CHECKOUT TEST FAILED
+ CHECKOUT + DOCKER TEST FAILED
 =========================================
 
-Review the Jenkins console output.
+Review the Jenkins console output to identify
+whether Checkout or Docker verification failed.
 
 =========================================
 '''

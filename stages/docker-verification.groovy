@@ -1,9 +1,13 @@
-def run() {
+echo '======================================'
+echo 'VERIFYING DOCKER'
+echo '======================================'
 
-    bat 'docker --version'
+bat 'docker --version'
 
-    bat 'docker compose version'
-}
+bat 'docker compose version'
 
+echo '✓ Docker verification completed.'
 
-return this
+echo '======================================'
+echo 'DOCKER READY'
+echo '======================================'
