@@ -3,11 +3,23 @@ pipeline {
     agent any
 
     options {
+
         timestamps()
+
         disableConcurrentBuilds()
-        buildDiscarder(logRotator(numToKeepStr: '20'))
-        timeout(time: 90, unit: 'MINUTES')
+
+        buildDiscarder(
+            logRotator(
+                numToKeepStr: '20'
+            )
+        )
+
+        timeout(
+            time: 90,
+            unit: 'MINUTES'
+        )
     }
+
 
     environment {
 
@@ -28,6 +40,37 @@ pipeline {
 
         SNYK_TOKEN =
             credentials('snyk_token')
+
+        DEFECTDOJO_API =
+            credentials('defectdojo_api_key')
+
+
+        // ============================================================
+        // DEFECTDOJO
+        // ============================================================
+
+        DD_URL =
+            'http://localhost:8080'
+
+        DD_PRODUCT =
+            '1'
+
+        DD_ENGAGEMENT =
+            '1'
+
+
+        // ============================================================
+        // JIRA
+        // ============================================================
+
+        JIRA_URL =
+            'https://yourcompany.atlassian.net'
+
+        JIRA_PROJECT =
+            'SEC'
+
+        JIRA_ISSUE_TYPE =
+            'Bug'
 
 
         // ============================================================
@@ -52,7 +95,7 @@ pipeline {
 
         // ============================================================
         // MONITORING
-        // Reserved for later Prometheus/Grafana implementation.
+        // Reserved for future Prometheus/Grafana implementation.
         // ============================================================
 
         PROMETHEUS_URL =
@@ -65,8 +108,9 @@ pipeline {
 
     stages {
 
+
         // ============================================================
-        // 1. SOURCE + WORKSPACE
+        // 1. CHECKOUT
         // ============================================================
 
         stage('Checkout Repositories') {
@@ -75,7 +119,9 @@ pipeline {
 
                 script {
 
-                    load('stages/checkout.groovy')
+                    load(
+                        'stages/checkout.groovy'
+                    )
                 }
             }
         }
@@ -91,7 +137,9 @@ pipeline {
 
                 script {
 
-                    load('stages/docker-verification.groovy')
+                    load(
+                        'stages/docker-verification.groovy'
+                    )
                 }
             }
         }
@@ -107,7 +155,9 @@ pipeline {
 
                 script {
 
-                    load('stages/report-preparation.groovy')
+                    load(
+                        'stages/report-preparation.groovy'
+                    )
                 }
             }
         }
@@ -123,7 +173,9 @@ pipeline {
 
                 script {
 
-                    load('stages/semgrep-sast.groovy')
+                    load(
+                        'stages/semgrep-sast.groovy'
+                    )
                 }
             }
         }
@@ -139,7 +191,9 @@ pipeline {
 
                 script {
 
-                    load('stages/semgrep-analysis.groovy')
+                    load(
+                        'stages/semgrep-analysis.groovy'
+                    )
                 }
             }
         }
@@ -153,13 +207,16 @@ pipeline {
 
             parallel {
 
+
                 stage('Gitleaks Secret Scan') {
 
                     steps {
 
                         script {
 
-                            load('stages/gitleaks-scan.groovy')
+                            load(
+                                'stages/gitleaks-scan.groovy'
+                            )
                         }
                     }
                 }
@@ -171,7 +228,9 @@ pipeline {
 
                         script {
 
-                            load('stages/snyk-scan.groovy')
+                            load(
+                                'stages/snyk-scan.groovy'
+                            )
                         }
                     }
                 }
@@ -183,7 +242,9 @@ pipeline {
 
                         script {
 
-                            load('stages/trivy-scan.groovy')
+                            load(
+                                'stages/trivy-scan.groovy'
+                            )
                         }
                     }
                 }
@@ -201,7 +262,9 @@ pipeline {
 
                 script {
 
-                    load('stages/static-analysis.groovy')
+                    load(
+                        'stages/static-analysis.groovy'
+                    )
                 }
             }
         }
@@ -217,7 +280,244 @@ pipeline {
 
                 script {
 
-                    load('stages/dast-cleanup.groovy')
+                    load(
+                        'stages/dast-cleanup.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 11. START DAST ENVIRONMENT
+        // ============================================================
+
+        stage('Start DAST Environment') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/dast-start.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 12. WAIT FOR DAST SCAN
+        // ============================================================
+
+        stage('Wait For DAST Scan') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/dast-wait.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 13. COLLECT DAST REPORTS
+        // ============================================================
+
+        stage('Collect DAST Reports') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/dast-reports.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 14. STOP DAST ENVIRONMENT
+        // ============================================================
+
+        stage('Stop DAST Environment') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/dast-stop.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 15. ANALYZE DAST RESULTS
+        // ============================================================
+
+        stage('Analyze DAST Results') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/dast-analysis.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 16. GENERATE SUMMARY REPORT
+        // ============================================================
+
+        stage('Generate Summary Report') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/summary-report.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 17. START DEFECTDOJO
+        // ============================================================
+
+        stage('Start DefectDojo') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/defectdojo-start.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 18. UPLOAD REPORTS TO DEFECTDOJO
+        // ============================================================
+
+        stage('Upload Reports to DefectDojo') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/defectdojo-upload.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 19. COLLECT UNIFIED FINDINGS
+        // ============================================================
+
+        stage('Collect Unified Findings') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/defectdojo-findings.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 20. OPA POLICY EVALUATION
+        // ============================================================
+
+        stage('OPA Policy Evaluation') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/opa-evaluation.groovy'
+                    )
+                }
+            }
+
+
+            post {
+
+                always {
+
+                    archiveArtifacts(
+
+                        artifacts:
+                            'opa-result.json,opa-evaluation.json',
+
+                        allowEmptyArchive:
+                            true,
+
+                        fingerprint:
+                            true
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 21. DYNAMIC WAF PROTECTION
+        // ============================================================
+
+        stage('Dynamic WAF Protection') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/waf-protection.groovy'
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 22. ARCHIVE REPORTS
+        // ============================================================
+
+        stage('Archive Reports') {
+
+            steps {
+
+                script {
+
+                    load(
+                        'stages/archive-reports.groovy'
+                    )
                 }
             }
         }
