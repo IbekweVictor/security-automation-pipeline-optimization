@@ -34,7 +34,13 @@ pipeline {
             }
         }
     }
-
+    stage('Verify Docker') {
+    steps {
+        script {
+            load('stages/docker-verification.groovy')
+        }
+    }
+}
     post {
 
         success {
