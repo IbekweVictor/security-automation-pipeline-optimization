@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Security Pipeline</title>
+
+</head>
+
+
+<body
+    style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#1e293b"
+>
+
+
+<div
+    style="max-width:680px;margin:25px auto;background:#ffffff;border:1px solid #dbe3ec;border-radius:10px;overflow:hidden"
+>
+
+
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+
+    <div
+        style="background:#0f172a;padding:30px 34px;color:#ffffff"
+    >
+
+        <div
+            style="font-size:25px;font-weight:bold"
+        >
+            🔐 Security Pipeline
+        </div>
+
+        <div
+            style="margin-top:7px;font-size:13px;color:#94a3b8"
+        >
+            Automated Application Security Assessment
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MAIN CONTENT
+         ========================================================= -->
+
+    <div style="padding:30px">
+
+
+        <!-- =====================================================
+             PIPELINE STATUS
+             ===================================================== -->
+
+        <div
+            style="background:{{STATUS_COLOR}};border-radius:8px;padding:20px;text-align:center;color:#ffffff"
+        >
+
+            <div
+                style="font-size:11px;letter-spacing:2px;font-weight:bold"
+            >
+                PIPELINE STATUS
+            </div>
+
+            <div
+                style="font-size:24px;font-weight:bold;margin-top:6px"
+            >
+                {{STATUS}}
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             BUILD INFORMATION
+             ===================================================== -->
+
+        <table
+            width="100%"
+            cellspacing="0"
+            cellpadding="0"
+            style="margin-top:25px;border-collapse:collapse"
+        >
+
+            <tr>
+
+                <td
+                    width="50%"
+                    style="background:#f8fafc;border:1px solid #dbe3ec;padding:18px"
+                >
+
+                    <div
+                        style="font-size:11px;color:#64748b"
+                    >
+                        BUILD
+                    </div>
+
+                    <div
+                        style="font-size:19px;font-weight:bold;margin-top:6px"
+                    >
+                        #{{BUILD_NUMBER}}
+                    </div>
+
+                </td>
+
+
+                <td
+                    width="50%"
+                    style="background:#f8fafc;border:1px solid #dbe3ec;padding:18px"
+                >
+
+                    <div
+                        style="font-size:11px;color:#64748b"
+                    >
+                        PIPELINE DURATION
+                    </div>
+
+                    <div
+                        style="font-size:19px;font-weight:bold;margin-top:6px"
+                    >
+                        {{DURATION}}
+                    </div>
+
+                </td>
+
+            </tr>
+
+        </table>
+
+
+        <!-- =====================================================
+             FAILURE INFORMATION
+             ===================================================== -->
+
+        {{FAILURE_SECTION}}
+
+
+        <!-- =====================================================
+             SECURITY SCAN SUMMARY
+             ===================================================== -->
+
+        <h2
+            style="font-size:17px;margin:30px 0 14px"
+        >
+            Security Scan Summary
+        </h2>
+
+
+        <table
+            width="100%"
+            cellspacing="0"
+            cellpadding="0"
+            style="border:1px solid #dbe3ec;border-radius:8px;border-collapse:separate;overflow:hidden;font-size:12px"
+        >
+
+            <tr
+                style="background:#f8fafc"
+            >
+
+                <th
+                    align="left"
+                    style="padding:13px;border-bottom:1px solid #dbe3ec"
+                >
+                    Security Control
+                </th>
+
+                <th
+                    align="left"
+                    style="padding:13px;border-bottom:1px solid #dbe3ec"
+                >
+                    Tool
+                </th>
+
+                <th
+                    align="right"
+                    style="padding:13px;border-bottom:1px solid #dbe3ec"
+                >
+                    Findings
+                </th>
+
+            </tr>
+
+
+            {{SCAN_ROWS}}
+
+        </table>
+
+
+        <!-- =====================================================
+             SEVERITY LEGEND
+             ===================================================== -->
+
+        <div
+            style="margin-top:18px;background:#f8fafc;border:1px solid #dbe3ec;border-radius:8px;padding:15px;font-size:11px;color:#64748b"
+        >
+
+            <strong>Severity Legend</strong>
+
+            <br>
+            <br>
+
+            C — Critical
+            &nbsp;&nbsp;
+
+            H — High
+            &nbsp;&nbsp;
+
+            M — Medium
+            &nbsp;&nbsp;
+
+            L — Low
+            &nbsp;&nbsp;
+
+            I — Informational
+            &nbsp;&nbsp;
+
+            W — Warning
+
+        </div>
+
+
+        <!-- =====================================================
+             SECURITY GATE
+             ===================================================== -->
+
+        <h2
+            style="font-size:17px;margin:30px 0 14px"
+        >
+            Security Gate
+        </h2>
+
+
+        <div
+            style="border:1px solid #dbe3ec;border-radius:8px;padding:22px"
+        >
+
+            <span
+                style="display:inline-block;background:{{OPA_COLOR}};color:#ffffff;border-radius:6px;padding:10px 18px;font-size:12px;font-weight:bold"
+            >
+                OPA — {{OPA}}
+            </span>
+
+
+            <div
+                style="margin-top:14px;font-size:13px;color:#64748b;line-height:1.6"
+            >
+                {{OPA_MESSAGE}}
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             WAF STATUS
+             ===================================================== -->
+
+        <h2
+            style="font-size:17px;margin:30px 0 14px"
+        >
+            Web Application Firewall
+        </h2>
+
+
+        <div
+            style="border:1px solid #dbe3ec;border-radius:8px;padding:22px"
+        >
+
+            <div
+                style="font-size:11px;color:#64748b;letter-spacing:1px"
+            >
+                WAF STATUS
+            </div>
+
+
+            <div
+                style="font-size:19px;font-weight:bold;margin-top:7px;color:#334155"
+            >
+                {{WAF_STATUS}}
+            </div>
+
+
+            <div
+                style="margin-top:10px;font-size:12px;color:#64748b;line-height:1.6"
+            >
+                Dynamic Web Application Firewall protection status generated
+                by the security automation pipeline.
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             RECOMMENDED ACTION
+             ===================================================== -->
+
+        <h2
+            style="font-size:17px;margin:30px 0 14px"
+        >
+            Recommended Action
+        </h2>
+
+
+        <div
+            style="background:#f8fafc;border-left:5px solid {{ACTION_COLOR}};padding:18px;font-size:13px;line-height:1.6;color:#475569"
+        >
+
+            {{RECOMMENDATION}}
+
+        </div>
+
+
+        <!-- =====================================================
+             SECURITY EVIDENCE
+             ===================================================== -->
+
+        <h2
+            style="font-size:17px;margin:30px 0 14px"
+        >
+            Security Evidence
+        </h2>
+
+
+        <div
+            style="font-size:13px;line-height:1.7;color:#64748b"
+        >
+
+            Security evidence generated during this assessment is included
+            with the notification when available.
+
+            Individual scanner reports and consolidated security evidence
+            provide the basis for reviewing detected vulnerabilities,
+            security findings, policy decisions, and mitigation actions.
+
+            For failed builds, the Jenkins console output is also attached
+            when available.
+
+        </div>
+
+
+        <!-- =====================================================
+             SECURITY CONTROLS
+             ===================================================== -->
+
+        <div
+            style="margin-top:14px;background:#f8fafc;border:1px solid #dbe3ec;border-radius:8px;padding:16px;font-size:12px;color:#475569"
+        >
+
+            ✓ SAST
+
+            &nbsp;&nbsp;
+
+            ✓ Secrets Detection
+
+            &nbsp;&nbsp;
+
+            ✓ Dependency / SCA
+
+            &nbsp;&nbsp;
+
+            ✓ Container Security
+
+            &nbsp;&nbsp;
+
+            ✓ DAST
+
+            &nbsp;&nbsp;
+
+            ✓ OPA
+
+            &nbsp;&nbsp;
+
+            ✓ WAF
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+
+    <div
+        style="background:#f8fafc;border-top:1px solid #dbe3ec;text-align:center;padding:25px"
+    >
+
+        <div
+            style="font-size:13px;font-weight:bold;color:#334155"
+        >
+            Ibekwe Victor
+        </div>
+
+
+        <div
+            style="font-size:11px;color:#64748b;margin-top:5px"
+        >
+            AppSec Engineer
+        </div>
+
+
+        <div
+            style="font-size:10px;color:#94a3b8;margin-top:14px"
+        >
+
+            Automated Application Security Assessment
+
+            <br>
+
+            SAST · Secrets Detection · Dependency / SCA ·
+            Container Security · DAST · OPA · WAF
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
