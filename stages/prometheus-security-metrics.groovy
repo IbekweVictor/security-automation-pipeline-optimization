@@ -28,12 +28,10 @@
  * ============================================================
  */
 
-
 echo ""
 echo "=============================================="
 echo " PROMETHEUS SECURITY METRICS"
 echo "=============================================="
-
 
 /*
  * ============================================================
@@ -52,7 +50,6 @@ def jobName =
 
 def buildNumber =
     env.BUILD_NUMBER ?: '0'
-
 
 def encodedJobName =
     java.net.URLEncoder
@@ -73,7 +70,6 @@ try {
 
     bat """
         @echo off
-
         cd /d "${exporterDirectory}"
 
         echo.
@@ -273,17 +269,27 @@ try {
          * ====================================================
          * 7. PIPELINE DURATION
          * ====================================================
+         *
+         * IMPORTANT:
+         *
+         * Do NOT use:
+         *
+         *     Math.round(currentBuild.duration / 1000)
+         *
+         * Jenkins/Groovy converts the division result to
+         * BigDecimal, and the Jenkins Script Security sandbox
+         * can reject Math.round(BigDecimal).
+         *
+         * intdiv() performs integer division and avoids the
+         * rejected Math.round(BigDecimal) call.
          */
 
-        def durationSeconds = 0
+        def durationSeconds = 0L
 
-
-        if (currentBuild.duration) {
+        if (currentBuild.duration != null) {
 
             durationSeconds =
-                Math.round(
-                    currentBuild.duration / 1000
-                )
+                (currentBuild.duration as long).intdiv(1000L)
         }
 
 
@@ -349,6 +355,7 @@ security_waf_active{job="${jobName}"} ${wafActive}
 
 # TYPE jenkins_up gauge
 jenkins_up{job="${jobName}"} ${jenkinsUp}
+
 """
 
 
@@ -378,7 +385,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo ""
         echo "Generated Prometheus metrics:"
         echo ""
-
 
         bat '''
             @type security-metrics.prom
@@ -450,6 +456,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         echo ""
+
         echo "=============================================="
         echo " PROMETHEUS METRICS COMPLETED"
         echo "=============================================="
@@ -459,16 +466,21 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo "Build             : ${buildNumber}"
         echo "Pipeline Result   : ${currentBuild.currentResult}"
         echo "Jenkins UP        : ${jenkinsUp}"
+
         echo "Critical          : ${critical}"
         echo "High              : ${high}"
         echo "Medium            : ${medium}"
         echo "Low               : ${low}"
+
         echo "OPA Decision      : ${opaDecision}"
         echo "OPA PASS          : ${opaPass}"
         echo "OPA BLOCK         : ${opaBlock}"
+
         echo "WAF Status        : ${wafStatus}"
         echo "WAF Active        : ${wafActive}"
+
         echo "Duration          : ${durationSeconds}s"
+
         echo "Metrics Status    : ${env.PROMETHEUS_METRICS_STATUS}"
 
         echo "=============================================="
@@ -491,6 +503,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
 
 
     echo ""
+
     echo "=============================================="
     echo " WARNING: PROMETHEUS METRICS FAILED"
     echo "=============================================="
@@ -498,6 +511,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
     echo "Metrics error: ${metricsError}"
 
     echo ""
+
     echo "Security pipeline execution will continue."
 
     echo "=============================================="
