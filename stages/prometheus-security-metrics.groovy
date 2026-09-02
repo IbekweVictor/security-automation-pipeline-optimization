@@ -3,10 +3,10 @@
  * PROMETHEUS SECURITY METRICS
  * ============================================================
  *
- * Starts the independent Pushgateway stack, verifies that
- * Pushgateway is available, collects metrics produced by
- * previous security stages, and pushes those metrics to
- * Pushgateway.
+ * Starts the independent Pushgateway / Prometheus / Grafana
+ * stack, verifies that Pushgateway is available, collects
+ * metrics produced by previous security stages, and pushes
+ * those metrics to Pushgateway.
  *
  * Monitoring failure must NOT fail the security pipeline.
  *
@@ -64,7 +64,7 @@ try {
 
     /*
      * ========================================================
-     * 1. START PUSHGATEWAY / PROMETHEUS STACK
+     * 1. START PROMETHEUS MONITORING STACK
      * ========================================================
      */
 
@@ -94,12 +94,15 @@ try {
 
         echo.
         echo Docker Compose services:
+
         docker compose ps
     """
 
 
     /*
+     * ========================================================
      * Give Docker a moment to initialise Pushgateway.
+     * ========================================================
      */
 
     echo ""
@@ -115,6 +118,19 @@ try {
      * ========================================================
      * 2. CHECK PUSHGATEWAY
      * ========================================================
+     *
+     * IMPORTANT:
+     * Windows cmd treats % specially.
+     *
+     * Therefore curl's:
+     *
+     *     %{http_code}
+     *
+     * must be written as:
+     *
+     *     %%{http_code}
+     *
+     * inside the Jenkins bat command.
      */
 
     echo ""
@@ -123,7 +139,7 @@ try {
     def pushgatewayStatus =
         bat(
             script: """
-                @curl -s -o nul -w "%{http_code}" "${pushgatewayUrl}/-/ready"
+                @curl -s -o nul -w "%%{http_code}" "${pushgatewayUrl}/-/ready"
             """,
             returnStdout: true
         ).trim()
@@ -276,12 +292,12 @@ try {
          * 8. JENKINS CURRENTLY UP
          * ====================================================
          *
-         * The pipeline has successfully reached this stage,
+         * The pipeline successfully reached this stage,
          * therefore Jenkins is currently operational.
          *
          * This is a point-in-time metric.
          *
-         * A true Jenkins availability/uptime metric will
+         * A true Jenkins availability / uptime metric will
          * eventually come from Prometheus scraping Jenkins.
          */
 
@@ -396,6 +412,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo ""
         echo "Pushing security metrics to Pushgateway..."
 
+
         def pushStatus =
             bat(
                 script: """
@@ -436,6 +453,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo "=============================================="
         echo " PROMETHEUS METRICS COMPLETED"
         echo "=============================================="
+
         echo "Pushgateway       : ${pushgatewayUrl}"
         echo "Pipeline          : ${jobName}"
         echo "Build             : ${buildNumber}"
@@ -452,13 +470,15 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo "WAF Active        : ${wafActive}"
         echo "Duration          : ${durationSeconds}s"
         echo "Metrics Status    : ${env.PROMETHEUS_METRICS_STATUS}"
+
         echo "=============================================="
         echo ""
 
-
     }
 
+
 } catch (Exception metricsError) {
+
 
     /*
      * ========================================================
@@ -469,13 +489,17 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
     env.PROMETHEUS_METRICS_STATUS =
         'ERROR'
 
+
     echo ""
     echo "=============================================="
     echo " WARNING: PROMETHEUS METRICS FAILED"
     echo "=============================================="
+
     echo "Metrics error: ${metricsError}"
+
     echo ""
     echo "Security pipeline execution will continue."
+
     echo "=============================================="
     echo ""
 }
