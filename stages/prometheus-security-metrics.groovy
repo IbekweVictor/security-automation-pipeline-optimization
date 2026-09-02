@@ -5,7 +5,7 @@
  *
  * Starts the independent Pushgateway / Prometheus / Grafana
  * stack, verifies that Pushgateway is available, collects
- * metrics produced by previous security stages, and pushes
+ * unified security metrics produced by DefectDojo, and pushes
  * those metrics to Pushgateway.
  *
  * Monitoring failure must NOT fail the security pipeline.
@@ -29,6 +29,7 @@
  */
 
 echo ""
+
 echo "=============================================="
 echo " PROMETHEUS SECURITY METRICS"
 echo "=============================================="
@@ -77,8 +78,8 @@ try {
         echo PROMETHEUS EXPORTER DIRECTORY
         echo ==============================================
         echo %CD%
-        echo.
 
+        echo.
         echo Starting Docker Compose services...
 
         docker compose up -d
@@ -90,7 +91,6 @@ try {
 
         echo.
         echo Docker Compose services:
-
         docker compose ps
     """
 
@@ -116,6 +116,7 @@ try {
      * ========================================================
      *
      * IMPORTANT:
+     *
      * Windows cmd treats % specially.
      *
      * Therefore curl's:
@@ -127,6 +128,7 @@ try {
      *     %%{http_code}
      *
      * inside the Jenkins bat command.
+     * ========================================================
      */
 
     echo ""
@@ -160,23 +162,118 @@ try {
 
         /*
          * ====================================================
-         * 3. COLLECT SECURITY FINDINGS
+         * 3. COLLECT UNIFIED DEFECTDOJO FINDINGS
          * ====================================================
          *
-         * These values come from previous pipeline stages.
+         * These values are produced by:
+         *
+         *     defectdojo-findings.groovy
+         *
+         * That stage sets:
+         *
+         *     env.UNIFIED_CRITICAL
+         *     env.UNIFIED_HIGH
+         *     env.UNIFIED_MEDIUM
+         *     env.UNIFIED_LOW
+         *     env.UNIFIED_INFO
+         *
+         * We deliberately use the unified DefectDojo values
+         * rather than trying to re-count individual scanners.
+         * ====================================================
          */
 
-        def critical =
-            env.CRITICAL_FINDINGS ?: '0'
+        echo ""
+        echo "Collecting unified DefectDojo security findings..."
 
-        def high =
-            env.HIGH_FINDINGS ?: '0'
+        /*
+         * Keep the raw values for logging/debugging.
+         */
+        def rawCritical = env.UNIFIED_CRITICAL
+        def rawHigh     = env.UNIFIED_HIGH
+        def rawMedium   = env.UNIFIED_MEDIUM
+        def rawLow      = env.UNIFIED_LOW
+        def rawInfo     = env.UNIFIED_INFO
 
-        def medium =
-            env.MEDIUM_FINDINGS ?: '0'
+        echo ""
+        echo "DefectDojo unified finding variables:"
+        echo "UNIFIED_CRITICAL = ${rawCritical ?: '[NOT SET]'}"
+        echo "UNIFIED_HIGH     = ${rawHigh ?: '[NOT SET]'}"
+        echo "UNIFIED_MEDIUM   = ${rawMedium ?: '[NOT SET]'}"
+        echo "UNIFIED_LOW      = ${rawLow ?: '[NOT SET]'}"
+        echo "UNIFIED_INFO     = ${rawInfo ?: '[NOT SET]'}"
 
-        def low =
-            env.LOW_FINDINGS ?: '0'
+
+        /*
+         * Convert the values safely to integers.
+         *
+         * Missing values default to zero, but we explicitly
+         * report them above so they cannot silently hide the
+         * source of a problem.
+         */
+
+        def critical = 0
+        def high     = 0
+        def medium   = 0
+        def low      = 0
+        def info     = 0
+
+
+        try {
+            critical = rawCritical?.toString()?.trim()
+                ? rawCritical.toString().trim().toInteger()
+                : 0
+        } catch (Exception ignored) {
+            echo "WARNING: Invalid UNIFIED_CRITICAL value: ${rawCritical}"
+        }
+
+
+        try {
+            high = rawHigh?.toString()?.trim()
+                ? rawHigh.toString().trim().toInteger()
+                : 0
+        } catch (Exception ignored) {
+            echo "WARNING: Invalid UNIFIED_HIGH value: ${rawHigh}"
+        }
+
+
+        try {
+            medium = rawMedium?.toString()?.trim()
+                ? rawMedium.toString().trim().toInteger()
+                : 0
+        } catch (Exception ignored) {
+            echo "WARNING: Invalid UNIFIED_MEDIUM value: ${rawMedium}"
+        }
+
+
+        try {
+            low = rawLow?.toString()?.trim()
+                ? rawLow.toString().trim().toInteger()
+                : 0
+        } catch (Exception ignored) {
+            echo "WARNING: Invalid UNIFIED_LOW value: ${rawLow}"
+        }
+
+
+        try {
+            info = rawInfo?.toString()?.trim()
+                ? rawInfo.toString().trim().toInteger()
+                : 0
+        } catch (Exception ignored) {
+            echo "WARNING: Invalid UNIFIED_INFO value: ${rawInfo}"
+        }
+
+
+        echo ""
+        echo "=============================================="
+        echo " UNIFIED DEFECTDOJO FINDINGS"
+        echo "=============================================="
+        echo "Critical : ${critical}"
+        echo "High     : ${high}"
+        echo "Medium   : ${medium}"
+        echo "Low      : ${low}"
+        echo "Info     : ${info}"
+        echo "=============================================="
+
 
 
         /*
@@ -185,6 +282,7 @@ try {
          * ====================================================
          *
          * Track BOTH PASS and BLOCK.
+         * ====================================================
          */
 
         def opaDecision =
@@ -209,6 +307,7 @@ try {
         }
 
 
+
         /*
          * ====================================================
          * 5. WAF RESULT
@@ -229,6 +328,7 @@ try {
 
             wafActive = 1
         }
+
 
 
         /*
@@ -265,23 +365,22 @@ try {
         }
 
 
+
         /*
          * ====================================================
          * 7. PIPELINE DURATION
          * ====================================================
-         *
-         * IMPORTANT:
          *
          * Do NOT use:
          *
          *     Math.round(currentBuild.duration / 1000)
          *
          * Jenkins/Groovy converts the division result to
-         * BigDecimal, and the Jenkins Script Security sandbox
+         * BigDecimal and the Jenkins Script Security sandbox
          * can reject Math.round(BigDecimal).
          *
-         * intdiv() performs integer division and avoids the
-         * rejected Math.round(BigDecimal) call.
+         * intdiv() avoids that problem.
+         * ====================================================
          */
 
         def durationSeconds = 0L
@@ -293,26 +392,24 @@ try {
         }
 
 
+
         /*
          * ====================================================
          * 8. JENKINS CURRENTLY UP
          * ====================================================
-         *
-         * The pipeline successfully reached this stage,
-         * therefore Jenkins is currently operational.
-         *
-         * This is a point-in-time metric.
-         *
-         * A true Jenkins availability / uptime metric will
-         * eventually come from Prometheus scraping Jenkins.
          */
 
         def jenkinsUp = 1
 
 
+
         /*
          * ====================================================
          * 9. GENERATE PROMETHEUS METRICS
+         * ====================================================
+         *
+         * Security findings now come from the unified
+         * DefectDojo values.
          * ====================================================
          */
 
@@ -344,6 +441,9 @@ security_findings_medium{job="${jobName}"} ${medium}
 # TYPE security_findings_low gauge
 security_findings_low{job="${jobName}"} ${low}
 
+# TYPE security_findings_info gauge
+security_findings_info{job="${jobName}"} ${info}
+
 # TYPE security_opa_pass gauge
 security_opa_pass{job="${jobName}"} ${opaPass}
 
@@ -355,8 +455,8 @@ security_waf_active{job="${jobName}"} ${wafActive}
 
 # TYPE jenkins_up gauge
 jenkins_up{job="${jobName}"} ${jenkinsUp}
-
 """
+
 
 
         /*
@@ -368,6 +468,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         bat '''
             @if not exist "reports\\prometheus" mkdir "reports\\prometheus"
         '''
+
 
 
         /*
@@ -391,6 +492,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         '''
 
 
+
         /*
          * ====================================================
          * 12. PRESERVE METRICS AS SECURITY EVIDENCE
@@ -407,6 +509,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo ""
         echo "✓ Prometheus metrics evidence saved:"
         echo "  reports/prometheus/security-metrics.prom"
+
 
 
         /*
@@ -449,6 +552,7 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         }
 
 
+
         /*
          * ====================================================
          * 14. SUMMARY
@@ -456,33 +560,31 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         echo ""
-
         echo "=============================================="
         echo " PROMETHEUS METRICS COMPLETED"
         echo "=============================================="
-
         echo "Pushgateway       : ${pushgatewayUrl}"
         echo "Pipeline          : ${jobName}"
         echo "Build             : ${buildNumber}"
         echo "Pipeline Result   : ${currentBuild.currentResult}"
         echo "Jenkins UP        : ${jenkinsUp}"
-
+        echo ""
+        echo "UNIFIED DEFECTDOJO FINDINGS"
         echo "Critical          : ${critical}"
         echo "High              : ${high}"
         echo "Medium            : ${medium}"
         echo "Low               : ${low}"
-
+        echo "Info              : ${info}"
+        echo ""
         echo "OPA Decision      : ${opaDecision}"
         echo "OPA PASS          : ${opaPass}"
         echo "OPA BLOCK         : ${opaBlock}"
-
+        echo ""
         echo "WAF Status        : ${wafStatus}"
         echo "WAF Active        : ${wafActive}"
-
+        echo ""
         echo "Duration          : ${durationSeconds}s"
-
         echo "Metrics Status    : ${env.PROMETHEUS_METRICS_STATUS}"
-
         echo "=============================================="
         echo ""
 
@@ -503,17 +605,12 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
 
 
     echo ""
-
     echo "=============================================="
     echo " WARNING: PROMETHEUS METRICS FAILED"
     echo "=============================================="
-
     echo "Metrics error: ${metricsError}"
-
     echo ""
-
     echo "Security pipeline execution will continue."
-
     echo "=============================================="
     echo ""
 }
