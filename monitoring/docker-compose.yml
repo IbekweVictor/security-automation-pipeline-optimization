@@ -1,1 +1,129 @@
-# Monitoring suite specification
+services:
+
+  # ============================================================
+  # PROMETHEUS
+  # ============================================================
+
+  prometheus:
+    image: prom/prometheus:latest-distroless
+    container_name: devsecops-prometheus-1
+    restart: unless-stopped
+
+    ports:
+      - "9090:9090"
+
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+
+    depends_on:
+      - pushgateway
+      - jenkins-exporter
+
+
+  # ============================================================
+  # PUSHGATEWAY
+  #
+  # Jenkins pipeline pushes security metrics here.
+  # Prometheus then scrapes Pushgateway.
+  # ============================================================
+
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: devsecops-pushgateway
+    restart: unless-stopped
+
+    ports:
+      - "9091:9091"
+
+    volumes:
+      - pushgateway_data:/data
+
+    command:
+      - "--persistence.file=/data/pushgateway.data"
+      - "--persistence.interval=5m"
+
+
+  # ============================================================
+  # JENKINS EXPORTER
+  #
+  # Collects metrics from Jenkins API.
+  #
+  # Host Jenkins:
+  #   http://localhost:8081
+  #
+  # Exporter:
+  #   http://localhost:8000/metrics
+  #
+  # Host access:
+  #   http://localhost:9118/metrics
+  # ============================================================
+
+  jenkins-exporter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: devsecops-jenkins-exporter
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      JENKINS_URL: "http://host.docker.internal:8081"
+      JENKINS_JOB: "security-automation-pipeline"
+      JENKINS_USER: "admin"
+      JENKINS_API_TOKEN: "${JENKINS_API_TOKEN}"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+
+  # ============================================================
+  # GRAFANA
+  # ============================================================
+
+  grafana:
+    image: grafana/grafana:13.0.7-distroless-slim
+    container_name: devsecops-grafana
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+      # Existing dashboard provisioning
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+
+      # Existing dashboards
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+    depends_on:
+      - prometheus
+
+
+# ==============================================================
+# PERSISTENT STORAGE
+# ==============================================================
+
+volumes:
+
+  prometheus_data:
+
+  pushgateway_data:
+
+  grafana_data:

@@ -40,8 +40,8 @@ echo "=============================================="
  * ============================================================
  */
 
-def exporterDirectory =
-    'C:\\prometheus-exporter'
+def monitoringDirectory =
+    "${env.WORKSPACE}\\monitoring"
 
 def pushgatewayUrl =
     env.PUSHGATEWAY_URL ?: 'http://localhost:9091'
@@ -71,7 +71,7 @@ try {
 
     bat """
         @echo off
-        cd /d "${exporterDirectory}"
+        cd /d "${monitoringDirectory}"
 
         echo.
         echo ==============================================

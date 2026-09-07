@@ -570,19 +570,6 @@ pipeline {
 
         }
 
-
-        // *============================================================*
-        // *23. PROMETHEUS SECURITY METRICS*
-        // *============================================================*
-        //
-        // *Starts the independent monitoring stack from*
-        // *C:\prometheus-exporter, generates the security*
-        // *metrics file, and pushes the metrics to Pushgateway.*
-        //
-        // *Monitoring failure must NOT fail the security pipeline.*
-        //
-        // *============================================================*
-
         stage('Prometheus Security Metrics') {
 
             steps {

@@ -1,0 +1,73 @@
+global:
+
+  # Prometheus collects metrics every 15 seconds.
+  scrape_interval: 15s
+
+  # Rules/alerts use this evaluation interval.
+  evaluation_interval: 15s
+
+
+# ==============================================================
+# SCRAPE CONFIGURATIONS
+# ==============================================================
+
+scrape_configs:
+
+
+  # ============================================================
+  # PROMETHEUS ITSELF
+  # ============================================================
+
+  - job_name: "prometheus"
+
+    static_configs:
+
+      - targets:
+          - "prometheus:9090"
+
+
+  # ============================================================
+  # PUSHGATEWAY
+  #
+  # Jenkins pipeline pushes security metrics to:
+  #
+  # http://localhost:9091
+  #
+  # Prometheus then scrapes:
+  #
+  # http://pushgateway:9091/metrics
+  # ============================================================
+
+  - job_name: "pushgateway"
+
+    honor_labels: true
+
+    static_configs:
+
+      - targets:
+          - "pushgateway:9091"
+
+
+  # ============================================================
+  # JENKINS EXPORTER
+  #
+  # Your Python exporter runs outside the Docker stack.
+  #
+  # Windows:
+  #
+  #   host.docker.internal
+  #
+  # allows the Prometheus container to reach the exporter
+  # running on the Windows host.
+  #
+  # Expected exporter endpoint:
+  #
+  # http://localhost:8000/metrics
+  # ============================================================
+
+  - job_name: "jenkins"
+
+    static_configs:
+
+      - targets:
+          - "jenkins-exporter:8000"
