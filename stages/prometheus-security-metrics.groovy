@@ -67,19 +67,21 @@ try {
      */
 
     echo ""
+
     echo "Starting independent Prometheus monitoring stack..."
 
     bat """
         @echo off
+
         cd /d "${monitoringDirectory}"
 
         echo.
         echo ==============================================
-        echo PROMETHEUS EXPORTER DIRECTORY
+        echo MONITORING DIRECTORY
         echo ==============================================
         echo %CD%
-
         echo.
+
         echo Starting Docker Compose services...
 
         docker compose up -d
@@ -90,7 +92,9 @@ try {
         )
 
         echo.
+
         echo Docker Compose services:
+
         docker compose ps
     """
 
@@ -102,6 +106,7 @@ try {
      */
 
     echo ""
+
     echo "Waiting for Pushgateway..."
 
     sleep(
@@ -113,7 +118,6 @@ try {
     /*
      * ========================================================
      * 2. CHECK PUSHGATEWAY
-     * ========================================================
      *
      * IMPORTANT:
      *
@@ -132,6 +136,7 @@ try {
      */
 
     echo ""
+
     echo "Checking Pushgateway availability..."
 
     def pushgatewayStatus =
@@ -151,8 +156,11 @@ try {
             'PUSHGATEWAY_UNAVAILABLE'
 
         echo ""
+
         echo "WARNING: Pushgateway is not ready."
+
         echo "Metrics will not be pushed."
+
         echo "HTTP status: ${pushgatewayStatus}"
 
     } else {
@@ -183,19 +191,25 @@ try {
          */
 
         echo ""
+
         echo "Collecting unified DefectDojo security findings..."
+
 
         /*
          * Keep the raw values for logging/debugging.
          */
+
         def rawCritical = env.UNIFIED_CRITICAL
         def rawHigh     = env.UNIFIED_HIGH
         def rawMedium   = env.UNIFIED_MEDIUM
         def rawLow      = env.UNIFIED_LOW
         def rawInfo     = env.UNIFIED_INFO
 
+
         echo ""
+
         echo "DefectDojo unified finding variables:"
+
         echo "UNIFIED_CRITICAL = ${rawCritical ?: '[NOT SET]'}"
         echo "UNIFIED_HIGH     = ${rawHigh ?: '[NOT SET]'}"
         echo "UNIFIED_MEDIUM   = ${rawMedium ?: '[NOT SET]'}"
@@ -219,61 +233,83 @@ try {
 
 
         try {
+
             critical = rawCritical?.toString()?.trim()
                 ? rawCritical.toString().trim().toInteger()
                 : 0
+
         } catch (Exception ignored) {
+
             echo "WARNING: Invalid UNIFIED_CRITICAL value: ${rawCritical}"
+
         }
 
 
         try {
+
             high = rawHigh?.toString()?.trim()
                 ? rawHigh.toString().trim().toInteger()
                 : 0
+
         } catch (Exception ignored) {
+
             echo "WARNING: Invalid UNIFIED_HIGH value: ${rawHigh}"
+
         }
 
 
         try {
+
             medium = rawMedium?.toString()?.trim()
                 ? rawMedium.toString().trim().toInteger()
                 : 0
+
         } catch (Exception ignored) {
+
             echo "WARNING: Invalid UNIFIED_MEDIUM value: ${rawMedium}"
+
         }
 
 
         try {
+
             low = rawLow?.toString()?.trim()
                 ? rawLow.toString().trim().toInteger()
                 : 0
+
         } catch (Exception ignored) {
+
             echo "WARNING: Invalid UNIFIED_LOW value: ${rawLow}"
+
         }
 
 
         try {
+
             info = rawInfo?.toString()?.trim()
                 ? rawInfo.toString().trim().toInteger()
                 : 0
+
         } catch (Exception ignored) {
+
             echo "WARNING: Invalid UNIFIED_INFO value: ${rawInfo}"
+
         }
 
 
         echo ""
+
         echo "=============================================="
         echo " UNIFIED DEFECTDOJO FINDINGS"
         echo "=============================================="
+
         echo "Critical : ${critical}"
         echo "High     : ${high}"
         echo "Medium   : ${medium}"
         echo "Low      : ${low}"
         echo "Info     : ${info}"
-        echo "=============================================="
 
+        echo "=============================================="
 
 
         /*
@@ -304,8 +340,8 @@ try {
         ) {
 
             opaBlock = 1
-        }
 
+        }
 
 
         /*
@@ -327,8 +363,8 @@ try {
         ) {
 
             wafActive = 1
-        }
 
+        }
 
 
         /*
@@ -362,8 +398,8 @@ try {
         ) {
 
             pipelineFailure = 1
-        }
 
+        }
 
 
         /*
@@ -389,8 +425,8 @@ try {
 
             durationSeconds =
                 (currentBuild.duration as long).intdiv(1000L)
-        }
 
+        }
 
 
         /*
@@ -400,7 +436,6 @@ try {
          */
 
         def jenkinsUp = 1
-
 
 
         /*
@@ -458,7 +493,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
 """
 
 
-
         /*
          * ====================================================
          * 10. CREATE METRICS DIRECTORY
@@ -466,9 +500,10 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         bat '''
-            @if not exist "reports\\prometheus" mkdir "reports\\prometheus"
-        '''
 
+            @if not exist "reports\\prometheus" mkdir "reports\\prometheus"
+
+        '''
 
 
         /*
@@ -478,19 +513,26 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         writeFile(
+
             file: 'security-metrics.prom',
+
             text: metrics.trim() + '\n'
+
         )
 
 
         echo ""
+
         echo "Generated Prometheus metrics:"
+
         echo ""
 
-        bat '''
-            @type security-metrics.prom
-        '''
 
+        bat '''
+
+            @type security-metrics.prom
+
+        '''
 
 
         /*
@@ -500,16 +542,19 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         bat '''
+
             @copy /Y ^
             "security-metrics.prom" ^
             "reports\\prometheus\\security-metrics.prom" >nul
+
         '''
 
 
         echo ""
-        echo "✓ Prometheus metrics evidence saved:"
-        echo "  reports/prometheus/security-metrics.prom"
 
+        echo "✓ Prometheus metrics evidence saved:"
+
+        echo "  reports/prometheus/security-metrics.prom"
 
 
         /*
@@ -519,17 +564,24 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         echo ""
+
         echo "Pushing security metrics to Pushgateway..."
 
 
         def pushStatus =
+
             bat(
+
                 script: """
+
                     @curl --fail ^
                     --data-binary "@security-metrics.prom" ^
                     "${pushgatewayUrl}/metrics/job/${encodedJobName}"
+
                 """,
+
                 returnStatus: true
+
             )
 
 
@@ -539,7 +591,9 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
                 'PUSH_FAILED'
 
             echo ""
+
             echo "WARNING: Unable to push metrics to Pushgateway."
+
             echo "Curl exit code: ${pushStatus}"
 
         } else {
@@ -548,9 +602,10 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
                 'PUSHED'
 
             echo ""
-            echo "✓ Security metrics successfully pushed."
-        }
 
+            echo "✓ Security metrics successfully pushed."
+
+        }
 
 
         /*
@@ -560,32 +615,45 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
          */
 
         echo ""
+
         echo "=============================================="
         echo " PROMETHEUS METRICS COMPLETED"
         echo "=============================================="
+
         echo "Pushgateway       : ${pushgatewayUrl}"
         echo "Pipeline          : ${jobName}"
         echo "Build             : ${buildNumber}"
         echo "Pipeline Result   : ${currentBuild.currentResult}"
         echo "Jenkins UP        : ${jenkinsUp}"
+
         echo ""
+
         echo "UNIFIED DEFECTDOJO FINDINGS"
+
         echo "Critical          : ${critical}"
         echo "High              : ${high}"
         echo "Medium            : ${medium}"
         echo "Low               : ${low}"
         echo "Info              : ${info}"
+
         echo ""
+
         echo "OPA Decision      : ${opaDecision}"
         echo "OPA PASS          : ${opaPass}"
         echo "OPA BLOCK         : ${opaBlock}"
+
         echo ""
+
         echo "WAF Status        : ${wafStatus}"
         echo "WAF Active        : ${wafActive}"
+
         echo ""
+
         echo "Duration          : ${durationSeconds}s"
         echo "Metrics Status    : ${env.PROMETHEUS_METRICS_STATUS}"
+
         echo "=============================================="
+
         echo ""
 
     }
@@ -605,12 +673,19 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
 
 
     echo ""
+
     echo "=============================================="
     echo " WARNING: PROMETHEUS METRICS FAILED"
     echo "=============================================="
+
     echo "Metrics error: ${metricsError}"
+
     echo ""
+
     echo "Security pipeline execution will continue."
+
     echo "=============================================="
+
     echo ""
+
 }

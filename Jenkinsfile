@@ -58,21 +58,6 @@ pipeline {
         DD_ENGAGEMENT =
             '1'
 
-
-        // *============================================================*
-        // *JIRA*
-        // *============================================================*
-
-        JIRA_URL =
-            'https://yourcompany.atlassian.net'
-
-        JIRA_PROJECT =
-            'SEC'
-
-        JIRA_ISSUE_TYPE =
-            'Bug'
-
-
         // *============================================================*
         // *PROJECT PATHS*
         // *============================================================*
@@ -570,7 +555,7 @@ pipeline {
 
         }
 
-        stage('Prometheus Security Metrics') {
+        stage('Monitoring Metrics') {
 
             steps {
 
