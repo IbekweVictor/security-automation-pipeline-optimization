@@ -1,15 +1,4 @@
 /*
- * ============================================================
- * PROMETHEUS SECURITY METRICS
- * ============================================================
- *
- * Starts the independent Pushgateway / Prometheus / Grafana
- * stack, verifies that Pushgateway is available, collects
- * unified security metrics produced by DefectDojo, and pushes
- * those metrics to Pushgateway.
- *
- * Monitoring failure must NOT fail the security pipeline.
- *
  * Architecture:
  *
  * Jenkins Pipeline
@@ -80,6 +69,24 @@ try {
         echo MONITORING DIRECTORY
         echo ==============================================
         echo %CD%
+        echo.
+
+        echo Cleaning existing monitoring containers...
+        echo.
+
+        REM Remove existing monitoring containers if present.
+        REM Persistent Docker volumes are NOT removed.
+
+        for %%C in (
+            devsecops-prometheus-1
+            devsecops-pushgateway
+            devsecops-jenkins-exporter
+            devsecops-grafana
+        ) do (
+            docker rm -f %%C >nul 2>&1
+        )
+
+        echo Monitoring container cleanup completed.
         echo.
 
         echo Starting Docker Compose services...
@@ -158,9 +165,7 @@ try {
         echo ""
 
         echo "WARNING: Pushgateway is not ready."
-
         echo "Metrics will not be pushed."
-
         echo "HTTP status: ${pushgatewayStatus}"
 
     } else {
@@ -209,7 +214,6 @@ try {
         echo ""
 
         echo "DefectDojo unified finding variables:"
-
         echo "UNIFIED_CRITICAL = ${rawCritical ?: '[NOT SET]'}"
         echo "UNIFIED_HIGH     = ${rawHigh ?: '[NOT SET]'}"
         echo "UNIFIED_MEDIUM   = ${rawMedium ?: '[NOT SET]'}"
@@ -241,7 +245,6 @@ try {
         } catch (Exception ignored) {
 
             echo "WARNING: Invalid UNIFIED_CRITICAL value: ${rawCritical}"
-
         }
 
 
@@ -254,7 +257,6 @@ try {
         } catch (Exception ignored) {
 
             echo "WARNING: Invalid UNIFIED_HIGH value: ${rawHigh}"
-
         }
 
 
@@ -267,7 +269,6 @@ try {
         } catch (Exception ignored) {
 
             echo "WARNING: Invalid UNIFIED_MEDIUM value: ${rawMedium}"
-
         }
 
 
@@ -280,7 +281,6 @@ try {
         } catch (Exception ignored) {
 
             echo "WARNING: Invalid UNIFIED_LOW value: ${rawLow}"
-
         }
 
 
@@ -293,7 +293,6 @@ try {
         } catch (Exception ignored) {
 
             echo "WARNING: Invalid UNIFIED_INFO value: ${rawInfo}"
-
         }
 
 
@@ -302,13 +301,11 @@ try {
         echo "=============================================="
         echo " UNIFIED DEFECTDOJO FINDINGS"
         echo "=============================================="
-
         echo "Critical : ${critical}"
         echo "High     : ${high}"
         echo "Medium   : ${medium}"
         echo "Low      : ${low}"
         echo "Info     : ${info}"
-
         echo "=============================================="
 
 
@@ -335,12 +332,13 @@ try {
             opaPass = 1
 
         } else if (
+
             opaDecision.toUpperCase() == 'BLOCK' ||
             opaDecision.toUpperCase() == 'FAIL'
+
         ) {
 
             opaBlock = 1
-
         }
 
 
@@ -363,7 +361,6 @@ try {
         ) {
 
             wafActive = 1
-
         }
 
 
@@ -386,19 +383,22 @@ try {
             pipelineSuccess = 1
 
         } else if (
+
             currentBuild.currentResult ==
             'UNSTABLE'
+
         ) {
 
             pipelineUnstable = 1
 
         } else if (
+
             currentBuild.currentResult ==
             'FAILURE'
+
         ) {
 
             pipelineFailure = 1
-
         }
 
 
@@ -425,7 +425,6 @@ try {
 
             durationSeconds =
                 (currentBuild.duration as long).intdiv(1000L)
-
         }
 
 
@@ -450,46 +449,61 @@ try {
 
         def metrics = """
 # TYPE security_pipeline_build_info gauge
+
 security_pipeline_build_info{job="${jobName}",build="${buildNumber}"} 1
 
 # TYPE security_pipeline_build_success gauge
+
 security_pipeline_build_success{job="${jobName}"} ${pipelineSuccess}
 
 # TYPE security_pipeline_build_failure gauge
+
 security_pipeline_build_failure{job="${jobName}"} ${pipelineFailure}
 
 # TYPE security_pipeline_build_unstable gauge
+
 security_pipeline_build_unstable{job="${jobName}"} ${pipelineUnstable}
 
 # TYPE security_pipeline_duration_seconds gauge
+
 security_pipeline_duration_seconds{job="${jobName}"} ${durationSeconds}
 
 # TYPE security_findings_critical gauge
+
 security_findings_critical{job="${jobName}"} ${critical}
 
 # TYPE security_findings_high gauge
+
 security_findings_high{job="${jobName}"} ${high}
 
 # TYPE security_findings_medium gauge
+
 security_findings_medium{job="${jobName}"} ${medium}
 
 # TYPE security_findings_low gauge
+
 security_findings_low{job="${jobName}"} ${low}
 
 # TYPE security_findings_info gauge
+
 security_findings_info{job="${jobName}"} ${info}
 
 # TYPE security_opa_pass gauge
+
 security_opa_pass{job="${jobName}"} ${opaPass}
 
 # TYPE security_opa_block gauge
+
 security_opa_block{job="${jobName}"} ${opaBlock}
 
 # TYPE security_waf_active gauge
+
 security_waf_active{job="${jobName}"} ${wafActive}
 
 # TYPE jenkins_up gauge
+
 jenkins_up{job="${jobName}"} ${jenkinsUp}
+
 """
 
 
@@ -517,7 +531,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
             file: 'security-metrics.prom',
 
             text: metrics.trim() + '\n'
-
         )
 
 
@@ -553,7 +566,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo ""
 
         echo "✓ Prometheus metrics evidence saved:"
-
         echo "  reports/prometheus/security-metrics.prom"
 
 
@@ -581,7 +593,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
                 """,
 
                 returnStatus: true
-
             )
 
 
@@ -593,7 +604,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
             echo ""
 
             echo "WARNING: Unable to push metrics to Pushgateway."
-
             echo "Curl exit code: ${pushStatus}"
 
         } else {
@@ -604,7 +614,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
             echo ""
 
             echo "✓ Security metrics successfully pushed."
-
         }
 
 
@@ -653,7 +662,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
         echo "Metrics Status    : ${env.PROMETHEUS_METRICS_STATUS}"
 
         echo "=============================================="
-
         echo ""
 
     }
@@ -685,7 +693,6 @@ jenkins_up{job="${jobName}"} ${jenkinsUp}
     echo "Security pipeline execution will continue."
 
     echo "=============================================="
-
     echo ""
 
 }
