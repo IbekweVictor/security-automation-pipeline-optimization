@@ -11,7 +11,15 @@ dir('dvwa') {
         branches: [[name: '*/master']],
         userRemoteConfigs: [[
             url: env.DVWA_REPO
-        ]]
+        ]],
+        extensions: [
+            cloneOption(
+                shallow: true,
+                depth: 1,
+                noTags: true,
+                timeout: 20
+            )
+        ]
     )
 }
 
@@ -23,7 +31,15 @@ dir('authenticated-dast') {
         branches: [[name: '*/main']],
         userRemoteConfigs: [[
             url: env.DAST_REPO
-        ]]
+        ]],
+        extensions: [
+            cloneOption(
+                shallow: true,
+                depth: 1,
+                noTags: true,
+                timeout: 20
+            )
+        ]
     )
 }
 
