@@ -1,34 +1,31 @@
 {
   "annotations": {
-    "list": []
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
   "editable": true,
-  "graphTooltip": 0,
-  "id": 1005013092016128,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "type": "stat",
-      "title": "JENKINS",
-      "description": "Jenkins availability",
-      "transparent": true,
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 6,
-        "h": 6
-      },
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "cfy9vb2nm8utce"
       },
-      "targets": [
-        {
-          "expr": "max(jenkins_up)",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -36,17 +33,15 @@
           },
           "mappings": [
             {
-              "type": "value",
               "options": {
                 "0": {
-                  "text": "OFFLINE",
-                  "color": "red"
+                  "text": "OFFLINE"
                 },
                 "1": {
-                  "text": "ONLINE",
-                  "color": "green"
+                  "text": "ONLINE"
                 }
-              }
+              },
+              "type": "value"
             }
           ],
           "thresholds": {
@@ -65,9 +60,16 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
+        "colorMode": "background",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -77,32 +79,25 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value"
-      }
-    },
-    {
-      "id": 2,
-      "type": "stat",
-      "title": "PIPELINE STATUS",
-      "description": "Current security automation pipeline state",
-      "transparent": true,
-      "gridPos": {
-        "x": 6,
-        "y": 0,
-        "w": 6,
-        "h": 6
+        "textMode": "auto"
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_pipeline_build_unstable)",
+          "expr": "max(jenkins_up)",
           "instant": true,
+          "legendFormat": "Jenkins",
           "refId": "A"
         }
       ],
+      "title": "JENKINS",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -110,17 +105,15 @@
           },
           "mappings": [
             {
-              "type": "value",
               "options": {
                 "0": {
-                  "text": "STABLE",
-                  "color": "green"
+                  "text": "STABLE"
                 },
                 "1": {
-                  "text": "UNSTABLE",
-                  "color": "orange"
+                  "text": "UNSTABLE"
                 }
-              }
+              },
+              "type": "value"
             }
           ],
           "thresholds": {
@@ -139,9 +132,16 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
+        "colorMode": "background",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -151,41 +151,32 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value"
-      }
-    },
-    {
-      "id": 3,
-      "type": "gauge",
-      "title": "SECURITY POSTURE",
-      "description": "Total active security findings",
-      "transparent": true,
-      "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 6,
-        "h": 6
+        "textMode": "auto"
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_findings_critical) + max(security_findings_high) + max(security_findings_medium) + max(security_findings_low) + max(security_findings_info)",
+          "expr": "max(security_pipeline_build_unstable)",
           "instant": true,
+          "legendFormat": "Pipeline",
           "refId": "A"
         }
       ],
+      "title": "PIPELINE STATUS",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
-          "min": 0,
-          "max": 1000,
-          "unit": "short",
-          "decimals": 0,
           "color": {
             "mode": "thresholds"
           },
+          "max": 1000,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -206,8 +197,17 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
       "options": {
-        "orientation": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "sizing": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -216,58 +216,64 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "SECURITY SCAN",
-      "description": "Security scanner suite completion summary",
-      "transparent": true,
-      "gridPos": {
-        "x": 18,
-        "y": 0,
-        "w": 6,
-        "h": 6
+        "showThresholdMarkers": true
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "5",
+          "expr": "sum(security_findings_critical) + sum(security_findings_high) + sum(security_findings_medium) + sum(security_findings_low) + sum(security_findings_info)",
           "instant": true,
+          "legendFormat": "Total Findings",
           "refId": "A"
         }
       ],
+      "title": "SECURITY POSTURE",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
+            "mode": "thresholds"
           },
           "mappings": [
             {
-              "type": "value",
               "options": {
                 "5": {
-                  "text": "COMPLETED",
-                  "color": "green"
+                  "text": "COMPLETED"
                 }
-              }
+              },
+              "type": "value"
             }
-          ]
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
+        "colorMode": "background",
+        "graphMode": "area",
         "justifyMode": "center",
-        "orientation": "vertical",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -275,77 +281,54 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
-      }
-    },
-    {
-      "id": 5,
-      "type": "piechart",
-      "title": "FINDINGS BY SEVERITY",
-      "description": "Distribution of current security findings",
-      "transparent": true,
-      "gridPos": {
-        "x": 0,
-        "y": 6,
-        "w": 9,
-        "h": 10
+        "textMode": "auto"
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_findings_critical)",
+          "expr": "5",
           "instant": true,
-          "legendFormat": "Critical",
+          "legendFormat": "Security Scan",
           "refId": "A"
-        },
-        {
-          "expr": "max(security_findings_high)",
-          "instant": true,
-          "legendFormat": "High",
-          "refId": "B"
-        },
-        {
-          "expr": "max(security_findings_medium)",
-          "instant": true,
-          "legendFormat": "Medium",
-          "refId": "C"
-        },
-        {
-          "expr": "max(security_findings_low)",
-          "instant": true,
-          "legendFormat": "Low",
-          "refId": "D"
-        },
-        {
-          "expr": "max(security_findings_info)",
-          "instant": true,
-          "legendFormat": "Info",
-          "refId": "E"
         }
       ],
+      "title": "SECURITY SCAN",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "color": {
+            "mode": "palette-classic"
+          }
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "id": 5,
       "options": {
-        "pieType": "donut",
         "displayLabels": [
           "name",
           "value"
         ],
         "legend": {
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "right",
+          "showLegend": true,
           "values": [
-            "value",
-            "percent"
+            "value"
           ]
         },
+        "pieType": "donut",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -354,421 +337,336 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "desc"
         }
-      }
-    },
-    {
-      "id": 6,
-      "type": "bargauge",
-      "title": "SEVERITY OVERVIEW",
-      "description": "Security findings ranked by severity",
-      "transparent": true,
-      "gridPos": {
-        "x": 9,
-        "y": 6,
-        "w": 15,
-        "h": 10
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_findings_critical)",
+          "expr": "security_findings_critical",
           "instant": true,
           "legendFormat": "Critical",
           "refId": "A"
         },
         {
-          "expr": "max(security_findings_high)",
+          "expr": "security_findings_high",
           "instant": true,
           "legendFormat": "High",
           "refId": "B"
         },
         {
-          "expr": "max(security_findings_medium)",
+          "expr": "security_findings_medium",
           "instant": true,
           "legendFormat": "Medium",
           "refId": "C"
         },
         {
-          "expr": "max(security_findings_low)",
+          "expr": "security_findings_low",
           "instant": true,
           "legendFormat": "Low",
           "refId": "D"
         },
         {
-          "expr": "max(security_findings_info)",
+          "expr": "security_findings_info",
           "instant": true,
           "legendFormat": "Info",
           "refId": "E"
         }
       ],
+      "title": "FINDINGS BY SEVERITY",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
-          "min": 0,
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 500
-              }
-            ]
+          "color": {
+            "mode": "continuous-GrYlRd"
           }
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "id": 6,
       "options": {
         "displayMode": "gradient",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "namePlacement": "auto",
         "orientation": "horizontal",
-        "showUnfilled": true,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
           "fields": "",
           "values": false
-        }
-      }
-    },
-    {
-      "id": 7,
-      "type": "timeseries",
-      "title": "SECURITY FINDINGS TREND",
-      "description": "Security findings across the selected time range",
-      "transparent": true,
-      "gridPos": {
-        "x": 0,
-        "y": 16,
-        "w": 16,
-        "h": 9
+        },
+        "showUnfilled": true,
+        "sizing": "auto"
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_findings_critical)",
+          "expr": "security_findings_critical",
+          "instant": true,
           "legendFormat": "Critical",
           "refId": "A"
         },
         {
-          "expr": "max(security_findings_high)",
+          "expr": "security_findings_high",
+          "instant": true,
           "legendFormat": "High",
           "refId": "B"
         },
         {
-          "expr": "max(security_findings_medium)",
+          "expr": "security_findings_medium",
+          "instant": true,
           "legendFormat": "Medium",
           "refId": "C"
         },
         {
-          "expr": "max(security_findings_low)",
+          "expr": "security_findings_low",
+          "instant": true,
           "legendFormat": "Low",
           "refId": "D"
         },
         {
-          "expr": "max(security_findings_info)",
+          "expr": "security_findings_info",
+          "instant": true,
           "legendFormat": "Info",
           "refId": "E"
         }
       ],
+      "title": "SEVERITY OVERVIEW",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "lineWidth": 2,
-          "fillOpacity": 12,
-          "pointSize": 3
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "pointSize": 3,
+            "showPoints": "auto"
+          }
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 16
+      },
+      "id": 7,
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
           "mode": "multi",
           "sort": "desc"
         }
-      }
-    },
-    {
-      "id": 8,
-      "type": "stat",
-      "title": "SECURITY CONTROLS",
-      "description": "WAF and OPA enforcement status",
-      "transparent": true,
-      "gridPos": {
-        "x": 16,
-        "y": 16,
-        "w": 8,
-        "h": 9
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_waf_active)",
+          "expr": "security_findings_critical",
+          "legendFormat": "Critical",
+          "refId": "A"
+        },
+        {
+          "expr": "security_findings_high",
+          "legendFormat": "High",
+          "refId": "B"
+        },
+        {
+          "expr": "security_findings_medium",
+          "legendFormat": "Medium",
+          "refId": "C"
+        },
+        {
+          "expr": "security_findings_low",
+          "legendFormat": "Low",
+          "refId": "D"
+        },
+        {
+          "expr": "security_findings_info",
+          "legendFormat": "Info",
+          "refId": "E"
+        }
+      ],
+      "title": "SECURITY FINDINGS TREND",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "INACTIVE"
+                },
+                "1": {
+                  "text": "ACTIVE"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "13.0.7",
+      "targets": [
+        {
+          "expr": "security_waf_active",
           "instant": true,
           "legendFormat": "WAF",
           "refId": "A"
         },
         {
-          "expr": "max(security_opa_block)",
+          "expr": "security_opa_block",
           "instant": true,
           "legendFormat": "OPA BLOCK",
           "refId": "B"
         },
         {
-          "expr": "max(security_opa_pass)",
+          "expr": "security_opa_pass",
           "instant": true,
           "legendFormat": "OPA PASS",
           "refId": "C"
         }
       ],
+      "title": "SECURITY CONTROLS",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              }
-            ]
+            "mode": "palette-classic"
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "WAF"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "WAF"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "INACTIVE",
-                        "color": "red"
-                      },
-                      "1": {
-                        "text": "ACTIVE",
-                        "color": "green"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "OPA BLOCK"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "OPA"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "ALLOWED",
-                        "color": "green"
-                      },
-                      "1": {
-                        "text": "BLOCKED",
-                        "color": "red"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "OPA PASS"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "OPA PASS"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "NO",
-                        "color": "orange"
-                      },
-                      "1": {
-                        "text": "PASS",
-                        "color": "green"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 24
+      },
+      "id": 9,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "horizontal",
+        "displayLabels": [
+          "name",
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "donut",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
           "fields": "",
           "values": false
-        },
-        "textMode": "value_and_name"
-      }
-    },
-    {
-      "id": 9,
-      "type": "piechart",
-      "title": "PIPELINE OUTCOME",
-      "description": "Current security pipeline outcome distribution",
-      "transparent": true,
-      "gridPos": {
-        "x": 0,
-        "y": 25,
-        "w": 8,
-        "h": 9
+        }
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_pipeline_build_success)",
+          "expr": "security_pipeline_build_success",
           "instant": true,
           "legendFormat": "Success",
           "refId": "A"
         },
         {
-          "expr": "max(security_pipeline_build_failure)",
+          "expr": "security_pipeline_build_failure",
           "instant": true,
           "legendFormat": "Failure",
           "refId": "B"
         },
         {
-          "expr": "max(security_pipeline_build_unstable)",
+          "expr": "security_pipeline_build_unstable",
           "instant": true,
           "legendFormat": "Unstable",
           "refId": "C"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "pieType": "donut",
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "right",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      }
+      "title": "PIPELINE OUTCOME",
+      "type": "piechart"
     },
     {
-      "id": 10,
-      "type": "gauge",
-      "title": "PIPELINE PERFORMANCE",
-      "description": "Latest pipeline execution duration",
-      "transparent": true,
-      "gridPos": {
-        "x": 8,
-        "y": 25,
-        "w": 8,
-        "h": 9
-      },
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "cfy9vb2nm8utce"
       },
-      "targets": [
-        {
-          "expr": "max(security_pipeline_duration_seconds)",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
       "fieldConfig": {
         "defaults": {
-          "min": 0,
-          "max": 3600,
-          "unit": "s",
-          "decimals": 0,
           "color": {
             "mode": "thresholds"
           },
+          "max": 3600,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -785,12 +683,22 @@
                 "value": 3000
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 24
+      },
+      "id": 10,
       "options": {
-        "orientation": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "sizing": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -798,67 +706,81 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      }
-    },
-    {
-      "id": 11,
-      "type": "timeseries",
-      "title": "PIPELINE PERFORMANCE TREND",
-      "description": "Pipeline execution duration over time",
-      "transparent": true,
-      "gridPos": {
-        "x": 16,
-        "y": 25,
-        "w": 8,
-        "h": 9
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_pipeline_duration_seconds)",
+          "expr": "security_pipeline_duration_seconds",
+          "instant": true,
           "legendFormat": "Duration",
           "refId": "A"
         }
       ],
+      "title": "PIPELINE PERFORMANCE",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cfy9vb2nm8utce"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "lineWidth": 3,
-          "fillOpacity": 15,
-          "pointSize": 4
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "pointSize": 3,
+            "showPoints": "auto"
+          },
+          "unit": "s"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "id": 11,
       "options": {
         "legend": {
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "bottom",
-          "calcs": [
-            "lastNotNull",
-            "mean",
-            "max"
-          ]
+          "showLegend": true
         },
         "tooltip": {
           "mode": "single",
           "sort": "desc"
         }
-      }
+      },
+      "pluginVersion": "13.0.7",
+      "targets": [
+        {
+          "expr": "security_pipeline_duration_seconds",
+          "legendFormat": "Pipeline Duration",
+          "refId": "A"
+        }
+      ],
+      "title": "PIPELINE PERFORMANCE TREND",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 41,
+  "style": "dark",
   "tags": [
     "devsecops",
     "security",
     "jenkins",
-    "prometheus"
+    "prometheus",
+    "dvwa"
   ],
   "templating": {
     "list": []
@@ -867,7 +789,10 @@
     "from": "now-1h",
     "to": "now"
   },
+  "timepicker": {},
+  "timezone": "",
   "title": "DevSecOps Security Center",
   "uid": "devsecops-security-center",
-  "version": 5
+  "version": 1,
+  "weekStart": ""
 }
