@@ -392,22 +392,6 @@ OPA Policy         ${opaStatus}
 
 WAF Protection     ${wafStatus}
 
-"""
-
-
-
-    /*
-     * ============================================================
-     * MONITORING
-     * ============================================================
-     */
-
-    def monitoringSection = """
-*MONITORING*
-Prometheus / Grafana    ${monitoringStatus}
-
-"""
-
 
 
     /*
