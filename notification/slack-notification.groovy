@@ -595,7 +595,7 @@ as part of the release validation process.
      */
 
     def grafanaDashboardUrl =
-        'http://localhost:3000/public-dashboards/1ec0414749d54f15a50faf0993507919'
+        'http://localhost:3000/public-dashboards/39be51a4093b49889e8e38e8b4b906ea'
 
     def grafanaLinkSection = """
 → <${grafanaDashboardUrl}|View Grafana Security Dashboard>
