@@ -1,18 +1,14 @@
 pipeline {
-
     agent any
 
     options {
         timestamps()
-
         disableConcurrentBuilds()
-
         buildDiscarder(
             logRotator(
                 numToKeepStr: '20'
             )
         )
-
         timeout(
             time: 90,
             unit: 'MINUTES'
@@ -20,23 +16,18 @@ pipeline {
     }
 
     environment {
-
         DVWA_REPO = 'https://github.com/IbekweVictor/DVWA.git'
         DAST_REPO = 'https://github.com/IbekweVictor/Authenticated-Dast-Scan.git'
-
         SNYK_TOKEN = credentials('snyk_token')
         DEFECTDOJO_API = credentials('defectdojo_api_key')
-
         DD_URL = 'http://localhost:8080'
         DD_PRODUCT = '1'
         DD_ENGAGEMENT = '1'
-
         REPORT_DIR = "${env.WORKSPACE}\\reports"
         OPA_DIR = "${env.WORKSPACE}\\opa"
         WAF_DIR = "${env.WORKSPACE}\\waf"
         NOTIFICATION_DIR = "${env.WORKSPACE}\\notification"
         MONITORING_DIR = "${env.WORKSPACE}\\monitoring"
-
         PROMETHEUS_URL = 'http://localhost:9090'
         GRAFANA_URL = 'http://localhost:3000'
     }
@@ -236,7 +227,6 @@ pipeline {
     post {
 
         always {
-
             script {
 
                 /*
@@ -246,7 +236,6 @@ pipeline {
                  */
 
                 try {
-
                     echo ''
                     echo 'Preparing notification components...'
 
@@ -272,7 +261,6 @@ pipeline {
                     echo 'Notification components verified.'
 
                 } catch (Exception setupError) {
-
                     echo 'WARNING: Notification preparation failed.'
                     echo "Setup error: ${setupError}"
                 }
@@ -285,7 +273,6 @@ pipeline {
                  */
 
                 try {
-
                     echo ''
                     echo 'Preserving security evidence from completed stages...'
 
@@ -314,12 +301,10 @@ pipeline {
                         echo '✓ Existing security evidence preserved.'
 
                     } else {
-
                         echo 'No security evidence available to preserve.'
                     }
 
                 } catch (Exception archiveError) {
-
                     echo 'WARNING: Security evidence preservation failed.'
                     echo "Archive error: ${archiveError}"
                 }
@@ -384,6 +369,7 @@ pipeline {
                  * Preserve:
                  *   - dvwa/
                  *   - authenticated-dast/
+                 *   - monitoring/
                  *
                  * Everything else is cleaned.
                  *
@@ -396,18 +382,26 @@ pipeline {
                 echo 'Cleaning Jenkins workspace...'
                 echo 'Preserving DVWA repository...'
                 echo 'Preserving Authenticated DAST repository...'
+                echo 'Preserving monitoring configuration...'
 
                 cleanWs(
                     deleteDirs: true,
                     disableDeferredWipeout: true,
                     notFailBuild: true,
                     patterns: [
+
                         [
                             pattern: 'dvwa/**',
                             type: 'EXCLUDE'
                         ],
+
                         [
                             pattern: 'authenticated-dast/**',
+                            type: 'EXCLUDE'
+                        ],
+
+                        [
+                            pattern: 'monitoring/**',
                             type: 'EXCLUDE'
                         ]
                     ]
@@ -416,6 +410,7 @@ pipeline {
                 echo '✓ Workspace cleanup completed.'
                 echo '✓ DVWA repository preserved.'
                 echo '✓ Authenticated DAST repository preserved.'
+                echo '✓ Monitoring configuration preserved.'
             }
         }
 
@@ -427,7 +422,6 @@ pipeline {
          */
 
         success {
-
             echo ''
             echo '======================================'
             echo 'SECURITY PIPELINE COMPLETED SUCCESSFULLY'
@@ -435,7 +429,6 @@ pipeline {
         }
 
         unstable {
-
             echo ''
             echo '======================================'
             echo 'SECURITY PIPELINE COMPLETED WITH WARNINGS'
@@ -443,7 +436,6 @@ pipeline {
         }
 
         failure {
-
             echo ''
             echo '======================================'
             echo 'SECURITY PIPELINE FAILED'
