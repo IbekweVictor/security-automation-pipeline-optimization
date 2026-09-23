@@ -22,7 +22,6 @@ def send() {
         env.BUILD_URL ?: ''
 
 
-
     /*
      * ============================================================
      * SLACK CONFIGURATION
@@ -34,7 +33,6 @@ def send() {
 
     def slackCredential =
         'slack-webhook'
-
 
 
     /*
@@ -51,7 +49,6 @@ def send() {
                 : '#dc2626'
 
 
-
     /*
      * ============================================================
      * STATUS TITLE
@@ -66,29 +63,22 @@ def send() {
                 : '🔴 SECURITY PIPELINE FAILED'
 
 
-
     /*
      * ============================================================
      * SCANNER STATUS HELPER
      *
      * null = scanner did not execute / did not produce a result
-     * 0   = scanner executed and found zero findings
-     * >0  = scanner executed and produced findings
+     * 0    = scanner executed and found zero findings
+     * >0   = scanner executed and produced findings
      * ============================================================
      */
 
     def scannerStatus = { value ->
-
         if (value != null) {
-
             return '✓ Executed'
-
         }
-
         return '- Not executed'
-
     }
-
 
 
     /*
@@ -103,7 +93,6 @@ def send() {
         )
 
 
-
     /*
      * ============================================================
      * GITLEAKS SECRET DETECTION
@@ -114,7 +103,6 @@ def send() {
         scannerStatus(
             env.GITLEAKS_COUNT
         )
-
 
 
     /*
@@ -129,7 +117,6 @@ def send() {
         )
 
 
-
     /*
      * ============================================================
      * TRIVY CONTAINER SECURITY
@@ -142,7 +129,6 @@ def send() {
         )
 
 
-
     /*
      * ============================================================
      * OWASP ZAP AUTHENTICATED DAST
@@ -153,7 +139,6 @@ def send() {
         scannerStatus(
             env.DAST_HIGH
         )
-
 
 
     /*
@@ -186,16 +171,12 @@ def send() {
 
         opaStatus =
             '- Not evaluated'
-
     }
-
 
 
     /*
      * ============================================================
      * WAF
-     *
-     * Supports the environment values exposed by the WAF stage.
      * ============================================================
      */
 
@@ -225,11 +206,9 @@ def send() {
                 '✓ Active'
 
         } else if (
-
             wafUpper == 'FAIL' ||
             wafUpper == 'FAILED' ||
             wafUpper == 'BLOCK'
-
         ) {
 
             wafStatus =
@@ -239,28 +218,18 @@ def send() {
 
             wafStatus =
                 "✓ ${wafValue}"
-
         }
 
     } else {
 
         wafStatus =
             '- Not reported'
-
     }
-
 
 
     /*
      * ============================================================
      * MONITORING
-     *
-     * Monitoring is part of the project architecture.
-     *
-     * The notification does not assume that Prometheus/Grafana
-     * executed successfully unless the monitoring stage exposes
-     * an environment result.
-     *
      * ============================================================
      */
 
@@ -289,10 +258,8 @@ def send() {
                 '✓ Active'
 
         } else if (
-
             monitoringUpper == 'FAIL' ||
             monitoringUpper == 'FAILED'
-
         ) {
 
             monitoringStatus =
@@ -302,16 +269,13 @@ def send() {
 
             monitoringStatus =
                 "✓ ${monitoringValue}"
-
         }
 
     } else {
 
         monitoringStatus =
             '- Not reported'
-
     }
-
 
 
     /*
@@ -336,9 +300,7 @@ def send() {
 
         pipelineStatusMessage =
             'Pipeline stopped during execution.'
-
     }
-
 
 
     /*
@@ -350,12 +312,10 @@ def send() {
     def buildSummary = """
 *${statusTitle}*
 
-`${jobName}`  •  Build `#${buildNumber}`  •  ${duration}
+`${jobName}` • Build `#${buildNumber}` • ${duration}
 
 ${pipelineStatusMessage}
-
 """
-
 
 
     /*
@@ -366,6 +326,7 @@ ${pipelineStatusMessage}
 
     def scannerSection = """
 *SECURITY SCANS*
+
 Semgrep SAST       ${semgrepStatus}
 
 Gitleaks Secrets   ${gitleaksStatus}
@@ -375,9 +336,7 @@ Snyk SCA           ${snykStatus}
 Trivy Container    ${trivyStatus}
 
 OWASP ZAP DAST     ${zapStatus}
-
 """
-
 
 
     /*
@@ -388,10 +347,24 @@ OWASP ZAP DAST     ${zapStatus}
 
     def controlsSection = """
 *SECURITY CONTROLS*
+
 OPA Policy         ${opaStatus}
 
 WAF Protection     ${wafStatus}
+"""
 
+
+    /*
+     * ============================================================
+     * MONITORING SECTION
+     * ============================================================
+     */
+
+    def monitoringSection = """
+*MONITORING*
+
+Prometheus/Grafana ${monitoringStatus}
+"""
 
 
     /*
@@ -407,69 +380,44 @@ WAF Protection     ${wafStatus}
 
     def signalLines = []
 
-
-
     if (env.SEMGREP_CRITICAL != null) {
 
         signalLines <<
-
             "Semgrep Critical: ${env.SEMGREP_CRITICAL ?: '0'}"
-
     }
-
-
 
     if (env.GITLEAKS_COUNT != null) {
 
         signalLines <<
-
             "Secrets: ${env.GITLEAKS_COUNT ?: '0'}"
-
     }
-
-
 
     if (env.SNYK_CRITICAL != null) {
 
         signalLines <<
-
             "Snyk Critical: ${env.SNYK_CRITICAL ?: '0'}"
-
     }
-
-
 
     if (env.TRIVY_CRITICAL != null) {
 
         signalLines <<
-
             "Trivy Critical: ${env.TRIVY_CRITICAL ?: '0'}"
-
     }
-
-
 
     if (env.DAST_HIGH != null) {
 
         signalLines <<
-
             "ZAP High: ${env.DAST_HIGH ?: '0'}"
-
     }
-
-
 
     if (!signalLines.isEmpty()) {
 
         securitySignal = """
 *SECURITY SIGNAL*
 
-${signalLines.join('  •  ')}
-
+${signalLines.join(' • ')}
 """
-
     }
-
 
 
     /*
@@ -489,11 +437,8 @@ ${signalLines.join('  •  ')}
 *OPA POLICY RESULT*
 
 ${opaMessage}
-
 """
-
     }
-
 
 
     /*
@@ -512,11 +457,9 @@ ${opaMessage}
 ❗ Pipeline execution failed.
 
 Review the Jenkins build, console output and preserved security
-
 evidence to identify and resolve the execution failure.
 
 ✉ Detailed failure information was sent by email.
-
 """
 
     } else if (result == 'UNSTABLE') {
@@ -527,11 +470,9 @@ evidence to identify and resolve the execution failure.
 ⚠ Security review required.
 
 Review the scanner findings, OPA policy result and WAF response
-
 before proceeding with the release.
 
 ✉ Detailed security assessment sent by email.
-
 """
 
     } else {
@@ -542,15 +483,11 @@ before proceeding with the release.
 ✓ Security automation completed successfully.
 
 Review the generated security evidence and assessment results
-
 as part of the release validation process.
 
 ✉ Detailed security assessment sent by email.
-
 """
-
     }
-
 
 
     /*
@@ -565,11 +502,8 @@ as part of the release validation process.
 
         buildLinkSection = """
 → <${buildUrl}|View Jenkins Build>
-
 """
-
     }
-
 
 
     /*
@@ -583,9 +517,7 @@ as part of the release validation process.
 
     def grafanaLinkSection = """
 → <${grafanaDashboardUrl}|View Grafana Security Dashboard>
-
 """
-
 
 
     /*
@@ -595,31 +527,18 @@ as part of the release validation process.
      */
 
     def message =
-
         buildSummary +
-
         "\n" +
-
         scannerSection +
-
         "\n" +
-
         controlsSection +
-
         "\n" +
-
         monitoringSection +
-
         securitySignal +
-
         opaMessageSection +
-
         actionSection +
-
         buildLinkSection +
-
         grafanaLinkSection
-
 
 
     /*
@@ -637,15 +556,10 @@ as part of the release validation process.
     try {
 
         slackSend(
-
             channel: slackChannel,
-
             color: slackColor,
-
             message: message,
-
             tokenCredentialId: slackCredential
-
         )
 
         echo "Slack notification sent: ${result}"
@@ -653,13 +567,9 @@ as part of the release validation process.
     } catch (Exception e) {
 
         echo "WARNING: Slack notification failed."
-
         echo "Slack error: ${e.getMessage()}"
-
     }
-
 }
-
 
 
 /*
