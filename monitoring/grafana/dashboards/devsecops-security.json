@@ -84,7 +84,7 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(jenkins_up)",
+          "expr": "max(last_over_time(jenkins_up[30d]))",
           "instant": true,
           "legendFormat": "Jenkins",
           "refId": "A"
@@ -156,7 +156,7 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "max(security_pipeline_build_unstable)",
+          "expr": "max(last_over_time(security_pipeline_build_unstable[30d]))",
           "instant": true,
           "legendFormat": "Pipeline",
           "refId": "A"
@@ -221,7 +221,7 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "sum(security_findings_critical) + sum(security_findings_high) + sum(security_findings_medium) + sum(security_findings_low) + sum(security_findings_info)",
+          "expr": "sum(last_over_time(security_findings_critical[30d])) + sum(last_over_time(security_findings_high[30d])) + sum(last_over_time(security_findings_medium[30d])) + sum(last_over_time(security_findings_low[30d])) + sum(last_over_time(security_findings_info[30d]))",
           "instant": true,
           "legendFormat": "Total Findings",
           "refId": "A"
@@ -344,31 +344,31 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "security_findings_critical",
+          "expr": "last_over_time(security_findings_critical[30d])",
           "instant": true,
           "legendFormat": "Critical",
           "refId": "A"
         },
         {
-          "expr": "security_findings_high",
+          "expr": "last_over_time(security_findings_high[30d])",
           "instant": true,
           "legendFormat": "High",
           "refId": "B"
         },
         {
-          "expr": "security_findings_medium",
+          "expr": "last_over_time(security_findings_medium[30d])",
           "instant": true,
           "legendFormat": "Medium",
           "refId": "C"
         },
         {
-          "expr": "security_findings_low",
+          "expr": "last_over_time(security_findings_low[30d])",
           "instant": true,
           "legendFormat": "Low",
           "refId": "D"
         },
         {
-          "expr": "security_findings_info",
+          "expr": "last_over_time(security_findings_info[30d])",
           "instant": true,
           "legendFormat": "Info",
           "refId": "E"
@@ -416,31 +416,31 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "security_findings_critical",
+          "expr": "last_over_time(security_findings_critical[30d])",
           "instant": true,
           "legendFormat": "Critical",
           "refId": "A"
         },
         {
-          "expr": "security_findings_high",
+          "expr": "last_over_time(security_findings_high[30d])",
           "instant": true,
           "legendFormat": "High",
           "refId": "B"
         },
         {
-          "expr": "security_findings_medium",
+          "expr": "last_over_time(security_findings_medium[30d])",
           "instant": true,
           "legendFormat": "Medium",
           "refId": "C"
         },
         {
-          "expr": "security_findings_low",
+          "expr": "last_over_time(security_findings_low[30d])",
           "instant": true,
           "legendFormat": "Low",
           "refId": "D"
         },
         {
-          "expr": "security_findings_info",
+          "expr": "last_over_time(security_findings_info[30d])",
           "instant": true,
           "legendFormat": "Info",
           "refId": "E"
@@ -457,7 +457,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-GrYlRd"
           },
           "custom": {
             "drawStyle": "line",
@@ -568,19 +568,19 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "security_waf_active",
+          "expr": "last_over_time(security_waf_active[30d])",
           "instant": true,
           "legendFormat": "WAF",
           "refId": "A"
         },
         {
-          "expr": "security_opa_block",
+          "expr": "last_over_time(security_opa_block[30d])",
           "instant": true,
           "legendFormat": "OPA BLOCK",
           "refId": "B"
         },
         {
-          "expr": "security_opa_pass",
+          "expr": "last_over_time(security_opa_pass[30d])",
           "instant": true,
           "legendFormat": "OPA PASS",
           "refId": "C"
@@ -634,19 +634,19 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "security_pipeline_build_success",
+          "expr": "last_over_time(security_pipeline_build_success[30d])",
           "instant": true,
           "legendFormat": "Success",
           "refId": "A"
         },
         {
-          "expr": "security_pipeline_build_failure",
+          "expr": "last_over_time(security_pipeline_build_failure[30d])",
           "instant": true,
           "legendFormat": "Failure",
           "refId": "B"
         },
         {
-          "expr": "security_pipeline_build_unstable",
+          "expr": "last_over_time(security_pipeline_build_unstable[30d])",
           "instant": true,
           "legendFormat": "Unstable",
           "refId": "C"
@@ -712,7 +712,7 @@
       "pluginVersion": "13.0.7",
       "targets": [
         {
-          "expr": "security_pipeline_duration_seconds",
+          "expr": "last_over_time(security_pipeline_duration_seconds[30d])",
           "instant": true,
           "legendFormat": "Duration",
           "refId": "A"
@@ -786,13 +786,13 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "DevSecOps Security Center",
   "uid": "devsecops-security-center",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
