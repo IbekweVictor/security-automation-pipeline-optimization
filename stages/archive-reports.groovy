@@ -1,103 +1,76 @@
+/*
+ * ARCHIVE SECURITY REPORTS
+ * ------------------------
+ * Archives all generated security evidence and optionally creates
+ * a consolidated ZIP archive.
+ */
+
 echo ''
 echo '=============================================='
 echo ' ARCHIVING SECURITY EVIDENCE'
 echo '=============================================='
 
-/*
- * ============================================================
- * INDIVIDUAL SECURITY REPORTS
- * ============================================================
- *
- * Individual reports are the primary security evidence.
- * They are archived even when ZIP creation is unavailable.
- */
+// Find all security evidence files
+def reportFiles = findFiles(glob: 'reports/**').findAll { file ->
+    !file.directory && !file.name.startsWith('security-reports-')
+}
 
-def reportFiles =
-    findFiles(
-        glob: 'reports/**/*'
-    ).findAll { file ->
-        !file.directory &&
-        !file.name.startsWith('security-reports-')
-    }
+echo "Security evidence files found: ${reportFiles.size()}"
 
+// Display files that will be archived
+reportFiles.each { file ->
+    echo "  ✓ ${file.path}"
+}
+
+// Archive individual security evidence
 if (reportFiles.size() > 0) {
-
-    echo "Security evidence files found: ${reportFiles.size()}"
-
-    reportFiles.each { file ->
-        echo "  ✓ ${file.path}"
-    }
+    echo 'Archiving artifacts'
 
     archiveArtifacts(
-        artifacts: 'reports/**/*',
+        artifacts: 'reports/**',
         fingerprint: true,
         allowEmptyArchive: true
     )
 
     echo ''
     echo '✓ Individual security evidence archived.'
-
 } else {
-
-    echo '⚠ No security evidence files found.'
+    echo ''
+    echo '⚠ No security evidence files found to archive.'
 }
-
-/*
- * ============================================================
- * OPTIONAL SECURITY EVIDENCE ZIP
- * ============================================================
- *
- * ZIP creation is supplementary.
- * Failure to create the ZIP must NOT remove or invalidate
- * the individual security evidence already archived.
- */
 
 echo ''
 echo 'Attempting optional security evidence ZIP...'
 
 try {
 
-    def zipFile =
-        "reports/security-reports-${env.BUILD_NUMBER}.zip"
+    def zipFile = "reports/security-reports-${env.BUILD_NUMBER}.zip"
 
-    powershell(
+    /*
+     * FIX:
+     * Jenkins cannot resolve "powershell" from its PATH.
+     * Use the full Windows PowerShell executable path instead.
+     */
+    bat(
         script: """
-\$zipPath = "${zipFile}"
-
-\$files = Get-ChildItem `
-    -Path "reports" `
-    -Recurse `
-    -File |
-    Where-Object {
-        \$_.Name -notlike "security-reports-*.zip"
-    }
-
-if (\$files.Count -gt 0) {
-
-    if (Test-Path \$zipPath) {
-        Remove-Item \$zipPath -Force
-    }
-
-    Compress-Archive `
-        -Path \$files.FullName `
-        -DestinationPath \$zipPath `
-        -Force
-
-    Write-Host "Security report ZIP created:"
-    Write-Host \$zipPath
-
-} else {
-
-    Write-Host "No files available for ZIP creation."
-}
-"""
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command ^
+            "\\$zipPath = '${zipFile}'; ^
+            \\$files = @(Get-ChildItem -Path 'reports' -Recurse -File | Where-Object { \\$_.Name -notlike 'security-reports-*.zip' }); ^
+            if (\\$files.Count -gt 0) { ^
+                if (Test-Path \\$zipPath) { Remove-Item \\$zipPath -Force }; ^
+                Compress-Archive -Path \\$files.FullName -DestinationPath \\$zipPath -Force; ^
+                Write-Host 'Security report ZIP created:'; ^
+                Write-Host \\$zipPath ^
+            } else { ^
+                Write-Host 'No files available for ZIP creation.' ^
+            }"
+        """
     )
 
     if (fileExists(zipFile)) {
-
         echo ''
         echo '✓ Optional security ZIP created.'
-        echo "  ${zipFile}"
+        echo "  ZIP: ${zipFile}"
 
         archiveArtifacts(
             artifacts: zipFile,
@@ -106,7 +79,6 @@ if (\$files.Count -gt 0) {
         )
 
     } else {
-
         echo ''
         echo '⚠ ZIP was not created.'
         echo 'Individual security reports remain archived.'
